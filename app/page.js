@@ -75,65 +75,78 @@ export default function Home() {
     msg += `🍲 Plats : ${totalPlats.toLocaleString()} F\n`;
     msg += `🛵 Livraison (${zoneLivraison}) : ${fraisLivraison.toLocaleString()} F\n`;
     msg += `💰 *TOTAL : ${totalGeneral.toLocaleString()} FCFA*\n`;
-    msg += `-------------------------\n\nEn attente de confirmation...`;
+    msg += `-------------------------\n\nMerci de me confirmer la commande !`;
     window.open(`https://wa.me/${numeroWhatsApp}?text=${encodeURIComponent(msg)}`, '_blank');
   };
 
   return (
-    <main className="min-h-screen bg-[#f5f3f0] text-stone-900 font-sans pb-40 selection:bg-orange-500 selection:text-white">
+    <main className="min-h-screen bg-[#0c0a09] text-stone-200 font-sans pb-40 selection:bg-amber-500 selection:text-black">
       
-      {/* HEADER CORRIGÉ : FOND SOMBRE ET TEXTES ULTRA LISIBLES */}
-      <header className="sticky top-0 z-50 backdrop-blur-xl bg-stone-950/95 border-b border-white/5 px-6 py-4 flex justify-between items-center max-w-7xl mx-auto rounded-b-3xl shadow-xl">
+      {/* HEADER GLASSMORPHISM SOMBRE */}
+      <header className="sticky top-0 z-50 backdrop-blur-xl bg-stone-950/80 border-b border-white/5 px-6 py-4 flex justify-between items-center max-w-7xl mx-auto rounded-b-3xl shadow-2xl">
         <div className="flex items-center space-x-2.5">
-          <span className="text-xl drop-shadow-sm">🔥</span>
+          <span className="text-2xl drop-shadow-[0_0_8px_rgba(245,158,11,0.5)] animate-pulse">🔥</span>
           <span className="text-xl font-black tracking-widest bg-gradient-to-r from-amber-400 via-orange-400 to-amber-500 bg-clip-text text-transparent">
             KÀNÒLÍ
           </span>
         </div>
-        
-        {/* LIENS DE NAVIGATION RÉAPPARUS */}
         <nav className="hidden md:flex space-x-8 text-xs font-bold uppercase tracking-widest text-stone-400">
           <a href="#accueil" className="hover:text-amber-400 transition-colors">Accueil</a>
           <a href="#menu" className="hover:text-amber-400 transition-colors">La Carte</a>
           <a href="#contact" className="hover:text-amber-400 transition-colors">Horaires</a>
         </nav>
-
         <button 
           onClick={() => { if(panier.length > 0) document.getElementById('panier-section')?.scrollIntoView({behavior: 'smooth'}) }}
-          className="bg-amber-500 hover:bg-amber-400 text-stone-950 font-black text-[11px] uppercase tracking-wider px-5 py-2.5 rounded-xl shadow-md transition-all flex items-center space-x-2"
+          className="bg-amber-500 hover:bg-amber-400 text-stone-950 font-black text-[11px] uppercase tracking-wider px-5 py-2.5 rounded-xl shadow-[0_4px_20px_rgba(245,158,11,0.25)] flex items-center space-x-2"
         >
           <span>🛒 Panier</span>
           <span className="bg-stone-950 text-amber-400 px-2 py-0.5 rounded-lg text-[10px] font-black tabular-nums shadow-inner">{totalArticles}</span>
         </button>
       </header>
 
-      {/* HERO BANNER AVEC OPACITÉ ÉQUILIBRÉE */}
+      {/* HERO BANNER AVEC LE FOND TRADITIONNEL CORRIGÉ EN CONTRASTE */}
       <section 
-        id="accueil"
-        className="relative py-28 md:py-36 px-6 max-w-7xl mx-auto text-center bg-cover bg-center bg-no-repeat rounded-3xl mt-4 overflow-hidden shadow-lg"
-        style={{ backgroundImage: "linear-gradient(to bottom, rgba(245, 243, 240, 0.65), rgba(245, 243, 240, 0.95)), url('https://kanoli-resto-depty-oj7wx9qmw-kamikaze-s-projects29.vercel.app/_next/image?url=%2F_next%2Fstatic%2Fmedia%2Fbg.bc64be73.png&w=1920&q=75')" }}
+        id="accueil" 
+        className="relative py-28 md:py-40 px-6 max-w-7xl mx-auto text-center bg-cover bg-center bg-no-repeat rounded-3xl mt-4 overflow-hidden shadow-2xl"
+        style={{ 
+          backgroundImage: "linear-gradient(to bottom, rgba(12, 10, 9, 0.70), rgba(12, 10, 9, 0.98)), url('https://kanoli-resto-depty-oj7wx9qmw-kamikaze-s-projects29.vercel.app/_next/image?url=%2F_next%2Fstatic%2Fmedia%2Fbg.bc64be73.png&w=1920&q=75')" 
+        }}
       >
-        <div className="relative z-10 max-w-3xl mx-auto">
-          <span className="inline-block text-[10px] font-black uppercase tracking-widest bg-stone-950/5 text-stone-700 border border-stone-950/10 px-4 py-1.5 rounded-full mb-6">Authentique Gastronomie Béninoise</span>
-          <h2 className="text-4xl md:text-6xl font-black tracking-tight mb-6 leading-tight text-stone-950">
-            Le goût du terroir,<br/>réinventé avec <span className="from-orange-600 to-amber-500 bg-gradient-to-r bg-clip-text text-transparent">Élégance</span>.
+        <div className="relative z-10 max-w-4xl mx-auto">
+          <span className="inline-flex items-center gap-2 text-[10px] font-black uppercase tracking-widest bg-white/5 text-amber-400 border border-white/10 px-4 py-2 rounded-full mb-8 backdrop-blur-md">
+            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-ping"></span>
+            Cuisine Connectée • Cotonou
+          </span>
+          <h2 className="text-4xl md:text-7xl font-black tracking-tight mb-6 leading-[1.15] text-white">
+            Le goût du terroir,<br/>réinventé avec <span className="bg-gradient-to-r from-amber-400 via-orange-500 to-amber-300 bg-clip-text text-transparent drop-shadow-sm">Élégance</span>.
           </h2>
-          <p className="text-xs md:text-sm text-stone-600 max-w-md mx-auto mb-8 font-semibold leading-relaxed">Composez votre menu en un clic et validez votre commande instantanément par WhatsApp.</p>
-          <a href="#menu" className="bg-gradient-to-r from-orange-600 to-amber-500 text-white px-8 py-3.5 rounded-xl font-black text-xs uppercase tracking-widest inline-block shadow-lg shadow-orange-600/20 hover:brightness-105 transition-all">Voir La Carte</a>
+          <p className="text-xs md:text-sm text-stone-400 max-w-lg mx-auto mb-10 leading-relaxed font-medium">
+            Découvrez notre carte synchronisée en direct. Composez votre panier et commandez instantanément via WhatsApp.
+          </p>
+          <a href="#menu" className="bg-gradient-to-r from-amber-500 to-orange-600 text-stone-950 px-8 py-4 rounded-xl font-black text-xs uppercase tracking-widest shadow-[0_4px_30px_rgba(245,158,11,0.2)] inline-block">
+            Consulter la Carte
+          </a>
         </div>
       </section>
 
-      {/* SECTION DU MENU */}
-      <section id="menu" className="py-16 px-4 max-w-7xl mx-auto">
-        
-        {/* BOUTONS DES CATÉGORIES BIEN VISIBLES */}
-        <div className="flex overflow-x-auto gap-2 mb-10 pb-2 scrollbar-none justify-start md:justify-center">
+      {/* LA CARTE */}
+      <section id="menu" className="py-20 px-4 max-w-7xl mx-auto">
+        <div className="text-center mb-10">
+          <h3 className="text-[10px] font-black uppercase tracking-widest text-amber-500 mb-2">Menu du jour</h3>
+          <p className="text-2xl md:text-4xl font-black text-white tracking-tight">Les Incontournables Kànòlí</p>
+          <div className="w-12 h-1 bg-gradient-to-r from-amber-500 to-orange-500 mx-auto mt-4 rounded-full"></div>
+        </div>
+
+        {/* SLIDER DES CATÉGORIES */}
+        <div className="flex overflow-x-auto justify-start md:justify-center gap-2.5 mb-14 pb-4 px-2 scrollbar-none snap-x">
           {categories.map((cat) => (
             <button
               key={cat}
               onClick={() => setCategorieActive(cat)}
-              className={`px-5 py-2.5 rounded-xl text-[11px] font-black uppercase tracking-wider transition-all border shrink-0 ${
-                categorieActive === cat ? "bg-stone-950 text-white border-stone-950 shadow-md" : "bg-white text-stone-600 border-stone-300/70 hover:text-stone-950 hover:bg-stone-50"
+              className={`snap-center px-5 py-3 rounded-xl text-[11px] font-black uppercase tracking-wider transition-all shrink-0 border duration-300 ${
+                categorieActive === cat
+                  ? "bg-white text-black border-white shadow-xl scale-102"
+                  : "bg-stone-900/40 text-stone-400 hover:text-white border-white/5 hover:bg-stone-900"
               }`}
             >
               {cat}
@@ -141,40 +154,50 @@ export default function Home() {
           ))}
         </div>
 
-        {/* GRILLE DES PLATS STYLE MAGAZINE */}
+        {/* GRILLE BENTO BOX DES PLATS */}
         <div className="grid md:grid-cols-2 gap-6 max-w-5xl mx-auto">
           {platsFiltres.map((plat) => {
             const itemDansPanier = panier.find(i => String(i.plat.id) === String(plat.id));
             const quantite = itemDansPanier ? itemDansPanier.quantite : 0;
 
             return (
-              <div key={plat.id} className="group bg-white border border-stone-200/60 p-4 rounded-3xl flex flex-col justify-between transition-all hover:shadow-xl hover:shadow-stone-300/40 hover:-translate-y-0.5">
-                <div>
-                  <div className="w-full h-48 rounded-2xl overflow-hidden mb-4 border border-stone-100 bg-stone-100 relative">
-                    <img src={plat.image} alt={plat.nom} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-102" />
-                    {plat.tag && (
-                      <span className="absolute top-3 right-3 text-[9px] font-black uppercase tracking-widest bg-orange-600 text-white px-2.5 py-1 rounded-lg shadow-sm">
-                        {plat.tag}
-                      </span>
-                    )}
+              <div 
+                key={plat.id} 
+                className="group bg-stone-900/30 hover:bg-stone-900/60 border border-white/[0.02] p-4 rounded-2xl shadow-xl flex flex-col justify-between transition-all duration-300 hover:-translate-y-1"
+              >
+                <div className="relative">
+                  {plat.tag && (
+                    <span className="absolute top-3 right-3 z-10 text-[9px] font-black uppercase tracking-widest bg-amber-500 text-stone-950 px-2.5 py-1 rounded-lg shadow-md">
+                      {plat.tag}
+                    </span>
+                  )}
+                  <div className="w-full h-48 rounded-xl overflow-hidden mb-4 border border-white/5 relative bg-stone-950 shadow-inner">
+                    <img src={plat.image} alt={plat.nom} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" />
                   </div>
-                  <span className="text-[9px] font-black tracking-widest uppercase text-orange-600 block mb-1">{plat.categorie}</span>
-                  <h4 className="text-base font-black text-stone-900 mb-1">{plat.nom}</h4>
-                  <p className="text-stone-500 text-xs leading-relaxed mb-4 font-medium">{plat.description}</p>
+                  <span className="text-[9px] font-black tracking-widest uppercase text-amber-500/80 block mb-1">{plat.categorie}</span>
+                  <h4 className="text-lg font-black text-white mb-1 tracking-tight">{plat.nom}</h4>
+                  <p className="text-stone-400 text-xs leading-relaxed mb-6 font-medium">{plat.description}</p>
                 </div>
 
-                <div className="flex items-center justify-between pt-4 border-t border-stone-100">
-                  <span className="font-black text-lg text-stone-900">{Number(plat.prix).toLocaleString()} <span className="text-[10px] text-orange-600">FCFA</span></span>
-                  
-                  {quantite > 0 ? (
-                    <div className="flex items-center bg-stone-100 rounded-xl border border-stone-200 p-1 w-28 justify-between">
-                      <button onClick={() => retirarDuPanier(plat.id)} className="w-7 h-7 bg-white text-stone-900 border border-stone-200/60 shadow-sm font-black rounded-lg text-xs">−</button>
-                      <span className="font-black text-xs text-stone-900">{quantite}</span>
-                      <button onClick={() => ajouterAuPanier(plat)} className="w-7 h-7 bg-stone-900 text-white font-black rounded-lg text-xs">+</button>
-                    </div>
-                  ) : (
-                    <button onClick={() => ajouterAuPanier(plat)} className="bg-stone-50 hover:bg-stone-950 text-stone-700 hover:text-white px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-wider border border-stone-200 transition-all">Ajouter 🛒</button>
-                  )}
+                <div className="flex items-center justify-between pt-4 border-t border-white/[0.03] mt-auto">
+                  <span className="font-black text-xl text-white tracking-tight">{Number(plat.prix).toLocaleString()} <span className="text-[10px] font-black text-amber-400 ml-0.5">FCFA</span></span>
+
+                  <div className="flex items-center justify-end">
+                    {quantite > 0 ? (
+                      <div className="flex items-center bg-stone-950 rounded-xl border border-white/5 p-1.5 shadow-xl w-32 justify-between">
+                        <button onClick={() => retirarDuPanier(plat.id)} className="w-8 h-8 rounded-lg bg-stone-900 text-white font-black flex items-center justify-center text-sm">−</button>
+                        <span className="font-black text-xs text-amber-400 tabular-nums">{quantite}</span>
+                        <button onClick={() => ajouterAuPanier(plat)} className="w-8 h-8 rounded-lg bg-amber-500 text-stone-950 font-black flex items-center justify-center text-sm">+</button>
+                      </div>
+                    ) : (
+                      <button 
+                        onClick={() => ajouterAuPanier(plat)}
+                        className="bg-stone-900 hover:bg-amber-500 text-stone-300 hover:text-stone-950 px-5 py-2.5 rounded-xl text-[11px] font-black uppercase tracking-wider transition-all border border-white/5"
+                      >
+                        Ajouter 🛒
+                      </button>
+                    )}
+                  </div>
                 </div>
               </div>
             );
@@ -182,46 +205,57 @@ export default function Home() {
         </div>
       </section>
 
-      {/* PANIER ULTRA VISIBLE ET SOMBRE POUR LE CONTRASTE */}
+      {/* FOOTER STICKY PANIER AVEC LIVRAISON INTEGREE */}
       {panier.length > 0 && (
-        <section id="panier-section" className="fixed bottom-4 left-4 right-4 z-50 bg-stone-950 text-white p-4 max-w-4xl mx-auto rounded-2xl shadow-2xl">
-          <div className="flex flex-col md:flex-row justify-between items-stretch md:items-center gap-4">
+        <section id="panier-section" className="fixed bottom-4 left-4 right-4 z-50 bg-stone-950/90 backdrop-blur-xl border border-white/10 shadow-[0_20px_50px_rgba(0,0,0,0.6)] p-5 max-w-4xl mx-auto rounded-2xl transition-all">
+          <div className="flex flex-col md:flex-row justify-between items-stretch md:items-center gap-5">
             <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 flex-1">
-              <div>
-                <span className="text-[9px] uppercase font-black text-stone-400 block tracking-widest">Votre Panier</span>
-                <span className="font-black text-xl text-white">{totalGeneral.toLocaleString()} F</span>
-                <span className="text-[10px] text-stone-400 block">Livraison incluse</span>
+              <div className="text-left">
+                <span className="text-[10px] uppercase font-black text-stone-400 tracking-widest block mb-0.5">Commande ({totalArticles} plats)</span>
+                <span className="font-black text-2xl text-white tracking-tight block">
+                  Total : <span className="text-amber-400 tabular-nums">{totalGeneral.toLocaleString()} F</span>
+                </span>
+                <span className="text-[10px] text-stone-500 block mt-0.5">Dont livraison : {fraisLivraison} F</span>
               </div>
-              <div className="w-full sm:w-auto bg-stone-900 border border-white/5 rounded-xl px-3 py-1.5">
-                <label className="text-[8px] font-black uppercase text-amber-400 block tracking-wider">Livraison</label>
-                <select value={zoneLivraison} onChange={(e) => setZoneLivraison(e.target.value)} className="bg-transparent text-xs font-bold text-white focus:outline-none cursor-pointer">
+              
+              {/* Sélecteur Cotonou discret et pro */}
+              <div className="w-full sm:w-auto bg-stone-900 border border-white/5 rounded-xl px-3 py-2 flex flex-col justify-center">
+                <label className="text-[9px] font-black uppercase text-amber-500 tracking-wider mb-0.5">Zone de livraison</label>
+                <select 
+                  value={zoneLivraison}
+                  onChange={(e) => setZoneLivraison(e.target.value)}
+                  className="bg-transparent text-xs font-bold text-white focus:outline-none cursor-pointer pr-4"
+                >
                   {Object.keys(tarificationLivraison).map((zone) => (
-                    <option key={zone} value={zone} className="bg-stone-900 text-white">{zone} (+{tarificationLivraison[zone]} F)</option>
+                    <option key={zone} value={zone} className="bg-stone-950 text-white">
+                      {zone} (+{tarificationLivraison[zone]} F)
+                    </option>
                   ))}
                 </select>
               </div>
             </div>
-            <div className="flex items-center space-x-4 justify-between">
-              <button onClick={() => setPanier([])} className="text-stone-400 hover:text-white text-[10px] font-black uppercase tracking-wider px-2">Vider</button>
-              <button onClick={envoyerCommandeWhatsApp} className="flex-1 md:flex-none bg-emerald-600 hover:bg-emerald-500 text-white font-black text-[11px] uppercase tracking-widest px-6 py-3.5 rounded-xl transition-colors">Commander 💬</button>
+            
+            <div className="flex items-center space-x-4 justify-between md:justify-end">
+              <button onClick={() => setPanier([])} className="text-stone-400 hover:text-red-400 text-[11px] font-black uppercase tracking-wider px-3 py-2 transition-colors">Vider</button>
+              <button onClick={envoyerCommandeWhatsApp} className="flex-1 md:flex-none bg-emerald-600 hover:bg-emerald-500 text-white font-black text-[11px] uppercase tracking-widest px-8 py-4 rounded-xl transition-all">Commander 💬</button>
             </div>
           </div>
         </section>
       )}
 
-      {/* FOOTER */}
-      <footer id="contact" className="bg-stone-900 text-stone-400 mt-24 py-12 px-6 text-center text-[11px] tracking-wide border-t border-white/5">
-        <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-8 mb-8 border-b border-white/5 pb-8">
+      {/* FOOTER BAS DE PAGE */}
+      <footer id="contact" className="bg-[#080706] border-t border-white/[0.02] mt-24 py-12 px-6 text-center text-stone-500 text-[11px] tracking-wide">
+        <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-8 text-stone-400 mb-8 border-b border-white/[0.02] pb-8">
           <div>
             <h5 className="font-black uppercase tracking-widest text-amber-500 text-[10px] mb-1">📍 Cotonou</h5>
-            <p className="text-white text-xs font-semibold">Avenue de la Marina, Fidjrossè</p>
+            <p className="text-stone-400 text-xs font-medium">Avenue de la Marina, Fidjrossè</p>
           </div>
           <div>
             <h5 className="font-black uppercase tracking-widest text-amber-500 text-[10px] mb-1">🕒 Service</h5>
-            <p className="text-white text-xs font-semibold">Lun - Dim : 11h00 - 23h00</p>
+            <p className="text-stone-400 text-xs font-medium">Lun - Dim : 11h00 - 23h00</p>
           </div>
         </div>
-        <p className="font-semibold text-stone-500">© 2026 Kànòlí Resto. Expérience de commande fluide.</p>
+        <p className="font-medium">© 2026 Kànòlí Resto. Expérience de commande fluide.</p>
       </footer>
 
     </main>

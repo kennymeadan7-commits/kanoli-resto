@@ -296,7 +296,7 @@ export default function Home() {
         <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-6 text-stone-400 mb-6">
           <div>
             <h5 className="font-bold text-white mb-0.5">📍 Localisation</h5>
-            <p className="text-stone-500 text-xs">Avenue Steinmetz, Fidjrossè, Cotonou, Bénin</p>
+            <p className="text-stone-500 text-xs">Avenue de la Marina, Fidjrossè, Cotonou, Bénin</p>
           </div>
           <div>
             <h5 className="font-bold text-white mb-0.5">🕒 Horaires</h5>

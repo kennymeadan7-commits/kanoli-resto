@@ -80,30 +80,41 @@ export default function Home() {
   };
 
   return (
-    <main className="min-h-screen bg-[#fcfbfa] text-stone-900 font-sans pb-40 selection:bg-orange-500 selection:text-white">
+    <main className="min-h-screen bg-[#f5f3f0] text-stone-900 font-sans pb-40 selection:bg-orange-500 selection:text-white">
       
-      {/* NAVIGATION BAR - STYLE CLAIR LUMINEUX */}
-      <header className="sticky top-0 z-50 backdrop-blur-xl bg-white/75 border-b border-stone-200/60 px-6 py-4 flex justify-between items-center max-w-7xl mx-auto rounded-b-3xl shadow-sm">
-        <div className="flex items-center space-x-2">
-          <span className="text-2xl drop-shadow-sm">🔥</span>
-          <span className="text-xl font-black tracking-widest bg-gradient-to-r from-orange-600 to-amber-500 bg-clip-text text-transparent">KÀNÒLÍ</span>
+      {/* HEADER CORRIGÉ : FOND SOMBRE ET TEXTES ULTRA LISIBLES */}
+      <header className="sticky top-0 z-50 backdrop-blur-xl bg-stone-950/95 border-b border-white/5 px-6 py-4 flex justify-between items-center max-w-7xl mx-auto rounded-b-3xl shadow-xl">
+        <div className="flex items-center space-x-2.5">
+          <span className="text-xl drop-shadow-sm">🔥</span>
+          <span className="text-xl font-black tracking-widest bg-gradient-to-r from-amber-400 via-orange-400 to-amber-500 bg-clip-text text-transparent">
+            KÀNÒLÍ
+          </span>
         </div>
+        
+        {/* LIENS DE NAVIGATION RÉAPPARUS */}
+        <nav className="hidden md:flex space-x-8 text-xs font-bold uppercase tracking-widest text-stone-400">
+          <a href="#accueil" className="hover:text-amber-400 transition-colors">Accueil</a>
+          <a href="#menu" className="hover:text-amber-400 transition-colors">La Carte</a>
+          <a href="#contact" className="hover:text-amber-400 transition-colors">Horaires</a>
+        </nav>
+
         <button 
           onClick={() => { if(panier.length > 0) document.getElementById('panier-section')?.scrollIntoView({behavior: 'smooth'}) }}
-          className="bg-stone-900 hover:bg-orange-600 text-white font-black text-[11px] uppercase tracking-wider px-5 py-2.5 rounded-xl shadow-md transition-colors flex items-center space-x-2"
+          className="bg-amber-500 hover:bg-amber-400 text-stone-950 font-black text-[11px] uppercase tracking-wider px-5 py-2.5 rounded-xl shadow-md transition-all flex items-center space-x-2"
         >
           <span>🛒 Panier</span>
-          <span className="bg-white/20 text-white px-2 py-0.5 rounded-lg text-[10px] tabular-nums">{totalArticles}</span>
+          <span className="bg-stone-950 text-amber-400 px-2 py-0.5 rounded-lg text-[10px] font-black tabular-nums shadow-inner">{totalArticles}</span>
         </button>
       </header>
 
-      {/* HERO BANNER - FINI LE TEXTE ILLISIBLE, LE TITRE CLAQUE ET RESTE VIF */}
+      {/* HERO BANNER AVEC OPACITÉ ÉQUILIBRÉE */}
       <section 
-        className="relative py-28 md:py-36 px-6 max-w-7xl mx-auto text-center bg-cover bg-center bg-no-repeat rounded-3xl mt-4 overflow-hidden shadow-md"
-        style={{ backgroundImage: "linear-gradient(to bottom, rgba(252, 251, 250, 0.7), rgba(252, 251, 250, 0.95)), url('https://kanoli-resto-depty-oj7wx9qmw-kamikaze-s-projects29.vercel.app/_next/image?url=%2F_next%2Fstatic%2Fmedia%2Fbg.bc64be73.png&w=1920&q=75')" }}
+        id="accueil"
+        className="relative py-28 md:py-36 px-6 max-w-7xl mx-auto text-center bg-cover bg-center bg-no-repeat rounded-3xl mt-4 overflow-hidden shadow-lg"
+        style={{ backgroundImage: "linear-gradient(to bottom, rgba(245, 243, 240, 0.65), rgba(245, 243, 240, 0.95)), url('https://kanoli-resto-depty-oj7wx9qmw-kamikaze-s-projects29.vercel.app/_next/image?url=%2F_next%2Fstatic%2Fmedia%2Fbg.bc64be73.png&w=1920&q=75')" }}
       >
         <div className="relative z-10 max-w-3xl mx-auto">
-          <span className="inline-block text-[10px] font-black uppercase tracking-widest bg-stone-900/5 text-stone-700 border border-stone-900/10 px-4 py-1.5 rounded-full mb-6">Authentique Gastronomie Béninoise</span>
+          <span className="inline-block text-[10px] font-black uppercase tracking-widest bg-stone-950/5 text-stone-700 border border-stone-950/10 px-4 py-1.5 rounded-full mb-6">Authentique Gastronomie Béninoise</span>
           <h2 className="text-4xl md:text-6xl font-black tracking-tight mb-6 leading-tight text-stone-950">
             Le goût du terroir,<br/>réinventé avec <span className="from-orange-600 to-amber-500 bg-gradient-to-r bg-clip-text text-transparent">Élégance</span>.
           </h2>
@@ -112,17 +123,17 @@ export default function Home() {
         </div>
       </section>
 
-      {/* GRILLE DES PLATS DE LA CARTE - STYLE SMART CARD */}
+      {/* SECTION DU MENU */}
       <section id="menu" className="py-16 px-4 max-w-7xl mx-auto">
         
-        {/* FILTRES PAR CATÉGORIES */}
+        {/* BOUTONS DES CATÉGORIES BIEN VISIBLES */}
         <div className="flex overflow-x-auto gap-2 mb-10 pb-2 scrollbar-none justify-start md:justify-center">
           {categories.map((cat) => (
             <button
               key={cat}
               onClick={() => setCategorieActive(cat)}
               className={`px-5 py-2.5 rounded-xl text-[11px] font-black uppercase tracking-wider transition-all border shrink-0 ${
-                categorieActive === cat ? "bg-stone-900 text-white border-stone-900 shadow-sm" : "bg-white text-stone-500 border-stone-200 hover:text-stone-900"
+                categorieActive === cat ? "bg-stone-950 text-white border-stone-950 shadow-md" : "bg-white text-stone-600 border-stone-300/70 hover:text-stone-950 hover:bg-stone-50"
               }`}
             >
               {cat}
@@ -130,14 +141,14 @@ export default function Home() {
           ))}
         </div>
 
-        {/* LES PLATS */}
+        {/* GRILLE DES PLATS STYLE MAGAZINE */}
         <div className="grid md:grid-cols-2 gap-6 max-w-5xl mx-auto">
           {platsFiltres.map((plat) => {
             const itemDansPanier = panier.find(i => String(i.plat.id) === String(plat.id));
             const quantite = itemDansPanier ? itemDansPanier.quantite : 0;
 
             return (
-              <div key={plat.id} className="group bg-white border border-stone-200/80 p-4 rounded-3xl flex flex-col justify-between transition-all hover:shadow-xl hover:shadow-stone-200/50 hover:-translate-y-0.5">
+              <div key={plat.id} className="group bg-white border border-stone-200/60 p-4 rounded-3xl flex flex-col justify-between transition-all hover:shadow-xl hover:shadow-stone-300/40 hover:-translate-y-0.5">
                 <div>
                   <div className="w-full h-48 rounded-2xl overflow-hidden mb-4 border border-stone-100 bg-stone-100 relative">
                     <img src={plat.image} alt={plat.nom} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-102" />
@@ -171,9 +182,9 @@ export default function Home() {
         </div>
       </section>
 
-      {/* PANIER RETRACTABLE STYLE ULTRA MODERNE CONTRASTÉ */}
+      {/* PANIER ULTRA VISIBLE ET SOMBRE POUR LE CONTRASTE */}
       {panier.length > 0 && (
-        <section id="panier-section" className="fixed bottom-4 left-4 right-4 z-50 bg-stone-900 text-white p-4 max-w-4xl mx-auto rounded-2xl shadow-xl shadow-stone-950/20">
+        <section id="panier-section" className="fixed bottom-4 left-4 right-4 z-50 bg-stone-950 text-white p-4 max-w-4xl mx-auto rounded-2xl shadow-2xl">
           <div className="flex flex-col md:flex-row justify-between items-stretch md:items-center gap-4">
             <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 flex-1">
               <div>
@@ -181,7 +192,7 @@ export default function Home() {
                 <span className="font-black text-xl text-white">{totalGeneral.toLocaleString()} F</span>
                 <span className="text-[10px] text-stone-400 block">Livraison incluse</span>
               </div>
-              <div className="w-full sm:w-auto bg-stone-800 border border-white/5 rounded-xl px-3 py-1.5">
+              <div className="w-full sm:w-auto bg-stone-900 border border-white/5 rounded-xl px-3 py-1.5">
                 <label className="text-[8px] font-black uppercase text-amber-400 block tracking-wider">Livraison</label>
                 <select value={zoneLivraison} onChange={(e) => setZoneLivraison(e.target.value)} className="bg-transparent text-xs font-bold text-white focus:outline-none cursor-pointer">
                   {Object.keys(tarificationLivraison).map((zone) => (
@@ -198,21 +209,21 @@ export default function Home() {
         </section>
       )}
 
-      {/* CONTACT FOOTER MODE CLAIR */}
-      <footer id="contact" className="bg-stone-100 border-t border-stone-200 mt-24 py-12 px-6 text-center text-stone-500 text-[11px] tracking-wide">
-        <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-8 text-stone-700 mb-8 border-b border-stone-200 pb-8">
+      {/* FOOTER */}
+      <footer id="contact" className="bg-stone-900 text-stone-400 mt-24 py-12 px-6 text-center text-[11px] tracking-wide border-t border-white/5">
+        <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-8 mb-8 border-b border-white/5 pb-8">
           <div>
-            <h5 className="font-black uppercase tracking-widest text-orange-600 text-[10px] mb-1">📍 Cotonou</h5>
-            <p className="text-stone-600 text-xs font-semibold">Avenue de la Marina, Fidjrossè</p>
+            <h5 className="font-black uppercase tracking-widest text-amber-500 text-[10px] mb-1">📍 Cotonou</h5>
+            <p className="text-white text-xs font-semibold">Avenue de la Marina, Fidjrossè</p>
           </div>
           <div>
-            <h5 className="font-black uppercase tracking-widest text-orange-600 text-[10px] mb-1">🕒 Service</h5>
-            <p className="text-stone-600 text-xs font-semibold">Lun - Dim : 11h00 - 23h00</p>
+            <h5 className="font-black uppercase tracking-widest text-amber-500 text-[10px] mb-1">🕒 Service</h5>
+            <p className="text-white text-xs font-semibold">Lun - Dim : 11h00 - 23h00</p>
           </div>
         </div>
-        <p className="font-semibold text-stone-400">© 2026 Kànòlí Resto. Expérience de commande fluide.</p>
+        <p className="font-semibold text-stone-500">© 2026 Kànòlí Resto. Expérience de commande fluide.</p>
       </footer>
 
     </main>
- );
+  );
 }

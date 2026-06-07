@@ -38,14 +38,14 @@ export default function Home() {
 
     recupererPlats();
 
-    // 🌟 SYNCHRONISATION INSTANTANÉE : Écoute les modifications de la page admin
+    // 🌟 SYNCHRONISATION INSTANTANÉE
     const canalRealtime = supabase
       .channel("liaison-directe-client")
       .on(
         "postgres_changes", 
         { event: "*", schema: "public", table: "plats" }, 
         () => {
-          recupererPlats(); // Recharge automatiquement la carte si le gérant change un truc
+          recupererPlats();
         }
       )
       .subscribe();
@@ -60,7 +60,7 @@ export default function Home() {
     ? plats 
     : plats.filter(plat => plat.categorie === categorieActive);
 
-  // 3. Fonctions du panier
+  // 3. Fonctions du panier (Correctif d'ID inclus)
   const ajouterAuPanier = (plat) => {
     setPanier((prevPanier) => {
       const existe = prevPanier.find(item => String(item.plat.id) === String(plat.id));
@@ -90,11 +90,10 @@ export default function Home() {
 
   const viderPanier = () => setPanier([]);
 
-  // Calculs automatiques
   const totalGeneral = panier.reduce((sum, item) => sum + (item.plat.prix * item.quantite), 0);
   const totalArticles = panier.reduce((sum, item) => sum + item.quantite, 0);
 
-  // 4. Envoi de la commande vers WhatsApp
+  // 4. Envoi vers WhatsApp
   const numeroWhatsApp = "22961000000"; 
 
   const envoyerCommandeWhatsApp = () => {
@@ -141,35 +140,28 @@ export default function Home() {
         </button>
       </header>
 
-      {/* 🛠️ NOUVELLE BANNIÈRE D'ACCÈS PRO */}
-      <div className="bg-stone-950 border-b border-stone-800/60 px-6 py-2 flex justify-center items-center text-[11px] font-bold tracking-wider text-stone-400 uppercase max-w-7xl mx-auto rounded-b-xl shadow-inner">
-        <div className="flex items-center space-x-2">
-          <span className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse"></span>
-          <span>Espace réservé à l'équipe —</span>
-          <a 
-            href="/admin" 
-            className="text-amber-400 hover:text-orange-400 underline decoration-amber-500/40 hover:decoration-orange-400 transition-all ml-1 flex items-center space-x-1"
-          >
-            <span>Accéder à la Gestion Pro 🔐</span>
+      {/* 🖼️ BANNER PRINCIPALE (HERO) AVEC IMAGE DE FOND PROFESSIONNELLE */}
+      <section 
+        id="accueil" 
+        className="relative py-24 md:py-36 px-6 max-w-7xl mx-auto text-center border-b border-stone-800 bg-cover bg-center bg-no-repeat"
+        style={{ 
+          backgroundImage: "linear-gradient(to bottom, rgba(28, 25, 23, 0.85), rgba(28, 25, 23, 0.95)), url('https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&q=80&w=1200')" 
+        }}
+      >
+        <div className="relative z-10 max-w-4xl mx-auto">
+          <span className="inline-block text-xs font-bold uppercase tracking-widest bg-amber-500/10 text-amber-400 border border-amber-500/20 px-4 py-1.5 rounded-full mb-6">
+            Authentique Gastronomie Béninoise
+          </span>
+          <h2 className="text-4xl md:text-6xl font-black tracking-tight mb-6 leading-tight text-white">
+            Le goût du terroir, réinventé avec <span className="bg-gradient-to-r from-amber-400 via-orange-500 to-red-500 bg-clip-text text-transparent">Élégance</span>.
+          </h2>
+          <p className="text-sm md:text-base text-stone-300 max-w-xl mx-auto mb-8 leading-relaxed">
+            Découvrez notre carte mise à jour en direct. Composez votre menu et passez commande instantanément sur WhatsApp.
+          </p>
+          <a href="#menu" className="bg-gradient-to-r from-amber-500 to-orange-600 text-stone-950 px-8 py-3.5 rounded-xl font-extrabold shadow-xl hover:brightness-110 transition-all inline-block">
+            Découvrir la Carte 🛒
           </a>
         </div>
-      </div>
-
-      {/* BANNER PRINCIPALE (HERO) */}
-      <section id="accueil" className="relative py-20 md:py-28 px-6 max-w-7xl mx-auto text-center border-b border-stone-800 overflow-hidden">
-        <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-orange-500/10 rounded-full blur-3xl pointer-events-none"></div>
-        <span className="inline-block text-xs font-bold uppercase tracking-widest bg-amber-500/10 text-amber-400 border border-amber-500/20 px-4 py-1.5 rounded-full mb-6">
-          Authentique Gastronomie Béninoise
-        </span>
-        <h2 className="text-5xl md:text-6xl font-black tracking-tight mb-6 max-w-4xl mx-auto leading-tight text-white">
-          Le goût du terroir, réinventé avec <span className="bg-gradient-to-r from-amber-400 via-orange-500 to-red-500 bg-clip-text text-transparent">Élégance</span>.
-        </h2>
-        <p className="text-sm md:text-base text-stone-400 max-w-xl mx-auto mb-8 leading-relaxed">
-          Découvrez notre carte mise à jour en direct. Composez votre menu et passez commande instantanément sur WhatsApp.
-        </p>
-        <a href="#menu" className="bg-gradient-to-r from-amber-500 to-orange-600 text-stone-950 px-8 py-3.5 rounded-xl font-extrabold shadow-xl hover:brightness-110 transition-all inline-block">
-          Découvrir la Carte 🛒
-        </a>
       </section>
 
       {/* SECTION EXPOSITION DU MENU */}
@@ -208,7 +200,7 @@ export default function Home() {
             Aucun plat n'est disponible sur la carte pour le moment.
           </div>
         ) : (
-          /* Grille des Plats branchée sur Supabase */
+          /* Grille des Plats */
           <div className="grid md:grid-cols-2 gap-8 max-w-5xl mx-auto">
             {platsFiltres.map((plat) => {
               const itemDansPanier = panier.find(item => String(item.plat.id) === String(plat.id));
@@ -277,7 +269,7 @@ export default function Home() {
         )}
       </section>
 
-      {/* FOOTER BAR STICKY (LE PANIER GLOBAL COMPLET) */}
+      {/* FOOTER BAR STICKY (PANIER GLOBAL) */}
       {panier.length > 0 && (
         <section id="panier-section" className="fixed bottom-0 left-0 right-0 z-50 bg-stone-950/95 backdrop-blur-md border-t-2 border-amber-500 shadow-2xl p-4 max-w-4xl mx-auto rounded-t-3xl">
           <div className="flex flex-col sm:flex-row justify-between items-center gap-4">

@@ -1,4 +1,3 @@
-
 "use client";
 export const dynamic = "force-dynamic";
 import { useState, useEffect } from "react";
@@ -64,10 +63,10 @@ export default function Home() {
   // 3. Fonctions du panier
   const ajouterAuPanier = (plat) => {
     setPanier((prevPanier) => {
-      const existe = prevPanier.find(item => item.plat.id === plat.id);
+      const existe = prevPanier.find(item => String(item.plat.id) === String(plat.id));
       if (existe) {
         return prevPanier.map(item => 
-          item.plat.id === plat.id ? { ...item, quantite: item.quantite + 1 } : item
+          String(item.plat.id) === String(plat.id) ? { ...item, quantite: item.quantite + 1 } : item
         );
       }
       return [...prevPanier, { plat, quantite: 1 }];
@@ -76,17 +75,13 @@ export default function Home() {
 
   const retirarDuPanier = (platId) => {
     setPanier((prevPanier) => {
-      // On cherche l'article en comparant les ID (on force la conversion en String pour éviter les bugs de type)
       const item = prevPanier.find(item => String(item.plat.id) === String(platId));
       
-      if (!item) return prevPanier; // Si le plat n'est pas dans le panier, on ne fait rien
+      if (!item) return prevPanier;
 
       if (item.quantite === 1) {
-        // S'il n'y en a qu'un, on supprime carrément le plat du panier
         return prevPanier.filter(item => String(item.plat.id) !== String(platId));
       }
-      
-      // Sinon, on diminue la quantité de 1
       return prevPanier.map(item => 
         String(item.plat.id) === String(platId) ? { ...item, quantite: item.quantite - 1 } : item
       );
@@ -146,6 +141,20 @@ export default function Home() {
         </button>
       </header>
 
+      {/* 🛠️ NOUVELLE BANNIÈRE D'ACCÈS PRO */}
+      <div className="bg-stone-950 border-b border-stone-800/60 px-6 py-2 flex justify-center items-center text-[11px] font-bold tracking-wider text-stone-400 uppercase max-w-7xl mx-auto rounded-b-xl shadow-inner">
+        <div className="flex items-center space-x-2">
+          <span className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse"></span>
+          <span>Espace réservé à l'équipe —</span>
+          <a 
+            href="/admin" 
+            className="text-amber-400 hover:text-orange-400 underline decoration-amber-500/40 hover:decoration-orange-400 transition-all ml-1 flex items-center space-x-1"
+          >
+            <span>Accéder à la Gestion Pro 🔐</span>
+          </a>
+        </div>
+      </div>
+
       {/* BANNER PRINCIPALE (HERO) */}
       <section id="accueil" className="relative py-20 md:py-28 px-6 max-w-7xl mx-auto text-center border-b border-stone-800 overflow-hidden">
         <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-orange-500/10 rounded-full blur-3xl pointer-events-none"></div>
@@ -202,7 +211,7 @@ export default function Home() {
           /* Grille des Plats branchée sur Supabase */
           <div className="grid md:grid-cols-2 gap-8 max-w-5xl mx-auto">
             {platsFiltres.map((plat) => {
-              const itemDansPanier = panier.find(item => item.plat.id === plat.id);
+              const itemDansPanier = panier.find(item => String(item.plat.id) === String(plat.id));
               const quantite = itemDansPanier ? itemDansPanier.quantite : 0;
 
               return (

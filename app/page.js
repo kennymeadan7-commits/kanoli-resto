@@ -1,152 +1,187 @@
 "use client";
+export const dynamic = "force-dynamic";
 import { useState, useEffect } from "react";
 import { createClient } from "@supabase/supabase-js";
 
+// Initialisation du client Supabase
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
-const tarificationLivraison = {
-  "Fidjrossè": 1000,
-  "Haie Vive / Cadjehoun": 1000,
-  "Cocotiers / Guinkomey": 1500,
-  "Akpakpa": 2000,
-  "Calavi (IITA / Kpota)": 2500,
-  "Zogbo / Sainte Rita": 1500
-};
-
-const categories = ["Tous", "Plat Traditionnel", "Spécialité", "Entrée / Snack"];
-
 export default function Home() {
+  // 1. États dynamiques branchés sur Supabase
   const [plats, setPlats] = useState([]); 
+  const [chargement, setChargement] = useState(true); 
   const [categorieActive, setCategorieActive] = useState("Tous");
   const [panier, setPanier] = useState([]); 
-  const [zoneLivraison, setZoneLivraison] = useState("Fidjrossè");
 
+  const categories = ["Tous", "Plat Traditionnel", "Spécialité", "Entrée / Snack"];
+
+  // 2. Chargement initial ET Écoute en Temps Réel (Realtime)
   useEffect(() => {
     async function recupererPlats() {
-      const { data } = await supabase
-        .from("plats")
-        .select("*")
-        .order("id", { ascending: true });
-      if (data) setPlats(data);
+      try {
+        setChargement(true);
+        const { data, error } = await supabase
+          .from("plats")
+          .select("*")
+          .order("id", { ascending: true });
+
+        if (error) throw error;
+        if (data) setPlats(data);
+      } catch (error) {
+        console.error("Erreur de récupération :", error.message);
+      } finally {
+        setChargement(false);
+      }
     }
-    
+
     recupererPlats();
 
+    // 🌟 SYNCHRONISATION INSTANTANÉE
     const canalRealtime = supabase
       .channel("liaison-directe-client")
-      .on("postgres_changes", { event: "*", schema: "public", table: "plats" }, () => {
-        recupererPlats();
-      })
+      .on(
+        "postgres_changes", 
+        { event: "*", schema: "public", table: "plats" }, 
+        () => {
+          recupererPlats();
+        }
+      )
       .subscribe();
 
-    return () => { supabase.removeChannel(canalRealtime); };
+    return () => {
+      supabase.removeChannel(canalRealtime);
+    };
   }, []);
 
-  const platsFiltres = categorieActive === "Tous" ? plats : plats.filter(p => p.categorie === categorieActive);
+  // Filtrage des plats
+  const platsFiltres = categorieActive === "Tous" 
+    ? plats 
+    : plats.filter(plat => plat.categorie === categorieActive);
 
+  // 3. Fonctions du panier (Correctif d'ID inclus)
   const ajouterAuPanier = (plat) => {
-    setPanier((prev) => {
-      const ex = prev.find(i => String(i.plat.id) === String(plat.id));
-      return ex ? prev.map(i => String(i.plat.id) === String(plat.id) ? { ...i, quantite: i.quantite + 1 } : i) : [...prev, { plat, quantite: 1 }];
+    setPanier((prevPanier) => {
+      const existe = prevPanier.find(item => String(item.plat.id) === String(plat.id));
+      if (existe) {
+        return prevPanier.map(item => 
+          String(item.plat.id) === String(plat.id) ? { ...item, quantite: item.quantite + 1 } : item
+        );
+      }
+      return [...prevPanier, { plat, quantite: 1 }];
     });
   };
 
   const retirarDuPanier = (platId) => {
-    setPanier((prev) => {
-      const item = prev.find(i => String(i.plat.id) === String(platId));
-      if (!item) return prev;
-      return item.quantite === 1 ? prev.filter(i => String(i.plat.id) !== String(platId)) : prev.map(i => String(i.plat.id) === String(platId) ? { ...i, quantite: i.quantite - 1 } : i);
+    setPanier((prevPanier) => {
+      const item = prevPanier.find(item => String(item.plat.id) === String(platId));
+      
+      if (!item) return prevPanier;
+
+      if (item.quantite === 1) {
+        return prevPanier.filter(item => String(item.plat.id) !== String(platId));
+      }
+      return prevPanier.map(item => 
+        String(item.plat.id) === String(platId) ? { ...item, quantite: item.quantite - 1 } : item
+      );
     });
   };
 
-  const totalPlats = panier.reduce((sum, i) => sum + (i.plat.prix * i.quantite), 0);
-  const fraisLivraison = panier.length > 0 ? tarificationLivraison[zoneLivraison] : 0;
-  const totalGeneral = totalPlats + fraisLivraison;
-  const totalArticles = panier.reduce((sum, i) => sum + i.quantite, 0);
+  const viderPanier = () => setPanier([]);
+
+  const totalGeneral = panier.reduce((sum, item) => sum + (item.plat.prix * item.quantite), 0);
+  const totalArticles = panier.reduce((sum, item) => sum + item.quantite, 0);
+
+  // 4. Envoi vers WhatsApp
   const numeroWhatsApp = "22961000000"; 
 
   const envoyerCommandeWhatsApp = () => {
     if (panier.length === 0) return;
-    let msg = `*🇧🇯 NOUVELLE COMMANDE - KÀNÒLÍ RESTO*\n\n`;
-    panier.forEach(i => { msg += `▪️ *${i.quantite}x* ${i.plat.nom} (${(i.plat.prix * i.quantite).toLocaleString()} F)\n`; });
-    msg += `\n-------------------------\n`;
-    msg += `🍲 Plats : ${totalPlats.toLocaleString()} F\n`;
-    msg += `🛵 Livraison (${zoneLivraison}) : ${fraisLivraison.toLocaleString()} F\n`;
-    msg += `💰 *TOTAL : ${totalGeneral.toLocaleString()} FCFA*\n`;
-    msg += `-------------------------\n\nMerci de me confirmer la commande !`;
-    window.open(`https://wa.me/${numeroWhatsApp}?text=${encodeURIComponent(msg)}`, '_blank');
+
+    let message = `*🇧🇯 NOUVELLE COMMANDE - KÀNÒLÍ RESTO*\n\n`;
+    message += `Bonjour, je souhaite passer la commande suivante :\n\n`;
+    
+    panier.forEach(item => {
+      const sousTotal = item.plat.prix * item.quantite;
+      message += `▪️ *${item.quantite}x* ${item.plat.nom} (${sousTotal.toLocaleString()} FCFA)\n`;
+    });
+
+    message += `\n-------------------------\n`;
+    message += `💰 *TOTAL À PAYER : ${totalGeneral.toLocaleString()} FCFA*\n`;
+    message += `-------------------------\n\n`;
+    message += `Merci de me confirmer la prise en compte et le délai !`;
+
+    window.open(`https://wa.me/${numeroWhatsApp}?text=${encodeURIComponent(message)}`, '_blank');
   };
 
   return (
-    <main className="min-h-screen bg-[#0c0a09] text-stone-200 font-sans pb-40 selection:bg-amber-500 selection:text-black">
+    <main className="min-h-screen bg-stone-900 text-stone-100 font-sans selection:bg-amber-500 selection:text-stone-900 pb-32">
       
-      {/* HEADER GLASSMORPHISM SOMBRE */}
-      <header className="sticky top-0 z-50 backdrop-blur-xl bg-stone-950/80 border-b border-white/5 px-6 py-4 flex justify-between items-center max-w-7xl mx-auto rounded-b-3xl shadow-2xl">
-        <div className="flex items-center space-x-2.5">
-          <span className="text-2xl drop-shadow-[0_0_8px_rgba(245,158,11,0.5)] animate-pulse">🔥</span>
-          <span className="text-xl font-black tracking-widest bg-gradient-to-r from-amber-400 via-orange-400 to-amber-500 bg-clip-text text-transparent">
-            KÀNÒLÍ
+      {/* BARRE DE NAVIGATION */}
+      <header className="sticky top-0 z-50 backdrop-blur-md bg-stone-900/80 border-b border-stone-800 px-6 py-4 flex justify-between items-center max-w-7xl mx-auto rounded-b-2xl shadow-xl">
+        <div className="flex items-center space-x-2">
+          <span className="text-2xl">🔥</span>
+          <span className="text-xl font-black tracking-wider uppercase bg-gradient-to-r from-amber-400 to-orange-500 bg-clip-text text-transparent">
+            KÀNÒLÍ RESTO
           </span>
         </div>
-        <nav className="hidden md:flex space-x-8 text-xs font-bold uppercase tracking-widest text-stone-400">
+        <nav className="hidden md:flex space-x-8 text-sm font-semibold tracking-wide text-stone-400">
           <a href="#accueil" className="hover:text-amber-400 transition-colors">Accueil</a>
           <a href="#menu" className="hover:text-amber-400 transition-colors">La Carte</a>
           <a href="#contact" className="hover:text-amber-400 transition-colors">Horaires</a>
         </nav>
         <button 
-          onClick={() => { if(panier.length > 0) document.getElementById('panier-section')?.scrollIntoView({behavior: 'smooth'}) }}
-          className="bg-amber-500 hover:bg-amber-400 text-stone-950 font-black text-[11px] uppercase tracking-wider px-5 py-2.5 rounded-xl shadow-[0_4px_20px_rgba(245,158,11,0.25)] flex items-center space-x-2"
+          onClick={() => { if(panier.length > 0) { document.getElementById('panier-section')?.scrollIntoView({behavior: 'smooth'}) } }}
+          className="bg-amber-500 hover:bg-amber-400 text-stone-950 font-bold text-xs uppercase tracking-wider px-5 py-2.5 rounded-full shadow-lg transition-all flex items-center space-x-2"
         >
           <span>🛒 Panier</span>
-          <span className="bg-stone-950 text-amber-400 px-2 py-0.5 rounded-lg text-[10px] font-black tabular-nums shadow-inner">{totalArticles}</span>
+          <span className="bg-stone-950 text-amber-400 px-2 py-0.5 rounded-full text-[10px] font-black tabular-nums">{totalArticles}</span>
         </button>
       </header>
 
-      {/* HERO BANNER AVEC LE FOND TRADITIONNEL CORRIGÉ EN CONTRASTE */}
+      {/* 🖼️ BANNER PRINCIPALE (HERO) AVEC IMAGE DE FOND PROFESSIONNELLE */}
       <section 
         id="accueil" 
-        className="relative py-28 md:py-40 px-6 max-w-7xl mx-auto text-center bg-cover bg-center bg-no-repeat rounded-3xl mt-4 overflow-hidden shadow-2xl"
+        className="relative py-24 md:py-36 px-6 max-w-7xl mx-auto text-center border-b border-stone-800 bg-cover bg-center bg-no-repeat"
         style={{ 
-          backgroundImage: "linear-gradient(to bottom, rgba(12, 10, 9, 0.70), rgba(12, 10, 9, 0.98)), url('https://kanoli-resto-depty-oj7wx9qmw-kamikaze-s-projects29.vercel.app/_next/image?url=%2F_next%2Fstatic%2Fmedia%2Fbg.bc64be73.png&w=1920&q=75')" 
+          backgroundImage: "linear-gradient(to bottom, rgba(28, 25, 23, 0.85), rgba(28, 25, 23, 0.95)), url('https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&q=80&w=1200')" 
         }}
       >
         <div className="relative z-10 max-w-4xl mx-auto">
-          <span className="inline-flex items-center gap-2 text-[10px] font-black uppercase tracking-widest bg-white/5 text-amber-400 border border-white/10 px-4 py-2 rounded-full mb-8 backdrop-blur-md">
-            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-ping"></span>
-            Cuisine Connectée • Cotonou
+          <span className="inline-block text-xs font-bold uppercase tracking-widest bg-amber-500/10 text-amber-400 border border-amber-500/20 px-4 py-1.5 rounded-full mb-6">
+            Authentique Gastronomie Béninoise
           </span>
-          <h2 className="text-4xl md:text-7xl font-black tracking-tight mb-6 leading-[1.15] text-white">
-            Le goût du terroir,<br/>réinventé avec <span className="bg-gradient-to-r from-amber-400 via-orange-500 to-amber-300 bg-clip-text text-transparent drop-shadow-sm">Élégance</span>.
+          <h2 className="text-4xl md:text-6xl font-black tracking-tight mb-6 leading-tight text-white">
+            Le goût du terroir, réinventé avec <span className="bg-gradient-to-r from-amber-400 via-orange-500 to-red-500 bg-clip-text text-transparent">Élégance</span>.
           </h2>
-          <p className="text-xs md:text-sm text-stone-400 max-w-lg mx-auto mb-10 leading-relaxed font-medium">
-            Découvrez notre carte synchronisée en direct. Composez votre panier et commandez instantanément via WhatsApp.
+          <p className="text-sm md:text-base text-stone-300 max-w-xl mx-auto mb-8 leading-relaxed">
+            Découvrez notre carte mise à jour en direct. Composez votre menu et passez commande instantanément sur WhatsApp.
           </p>
-          <a href="#menu" className="bg-gradient-to-r from-amber-500 to-orange-600 text-stone-950 px-8 py-4 rounded-xl font-black text-xs uppercase tracking-widest shadow-[0_4px_30px_rgba(245,158,11,0.2)] inline-block">
-            Consulter la Carte
+          <a href="#menu" className="bg-gradient-to-r from-amber-500 to-orange-600 text-stone-950 px-8 py-3.5 rounded-xl font-extrabold shadow-xl hover:brightness-110 transition-all inline-block">
+            Découvrir la Carte 🛒
           </a>
         </div>
       </section>
 
-      {/* LA CARTE */}
-      <section id="menu" className="py-20 px-4 max-w-7xl mx-auto">
-        <div className="text-center mb-10">
-          <h3 className="text-[10px] font-black uppercase tracking-widest text-amber-500 mb-2">Menu du jour</h3>
-          <p className="text-2xl md:text-4xl font-black text-white tracking-tight">Les Incontournables Kànòlí</p>
-          <div className="w-12 h-1 bg-gradient-to-r from-amber-500 to-orange-500 mx-auto mt-4 rounded-full"></div>
+      {/* SECTION EXPOSITION DU MENU */}
+      <section id="menu" className="py-16 px-6 max-w-7xl mx-auto">
+        <div className="text-center mb-4">
+          <h3 className="text-xs font-bold uppercase tracking-widest text-orange-500 mb-2">Notre Menu</h3>
+          <p className="text-2xl md:text-3xl font-extrabold text-white">Les Chefs d'Œuvre de notre Cuisine</p>
+          <div className="w-16 h-1 bg-amber-500 mx-auto mt-4 rounded-full"></div>
         </div>
 
-        {/* SLIDER DES CATÉGORIES */}
-        <div className="flex overflow-x-auto justify-start md:justify-center gap-2.5 mb-14 pb-4 px-2 scrollbar-none snap-x">
+        {/* Boutons de Filtres */}
+        <div className="flex flex-wrap justify-center gap-3 mb-12 mt-8">
           {categories.map((cat) => (
             <button
               key={cat}
               onClick={() => setCategorieActive(cat)}
-              className={`snap-center px-5 py-3 rounded-xl text-[11px] font-black uppercase tracking-wider transition-all shrink-0 border duration-300 ${
+              className={`px-4 py-2 rounded-xl text-xs font-bold uppercase tracking-wider transition-all duration-200 ${
                 categorieActive === cat
-                  ? "bg-white text-black border-white shadow-xl scale-102"
-                  : "bg-stone-900/40 text-stone-400 hover:text-white border-white/5 hover:bg-stone-900"
+                  ? "bg-gradient-to-r from-amber-500 to-orange-600 text-stone-950 shadow-lg scale-105"
+                  : "bg-stone-800 text-stone-400 hover:text-white border border-stone-700/50"
               }`}
             >
               {cat}
@@ -154,108 +189,129 @@ export default function Home() {
           ))}
         </div>
 
-        {/* GRILLE BENTO BOX DES PLATS */}
-        <div className="grid md:grid-cols-2 gap-6 max-w-5xl mx-auto">
-          {platsFiltres.map((plat) => {
-            const itemDansPanier = panier.find(i => String(i.plat.id) === String(plat.id));
-            const quantite = itemDansPanier ? itemDansPanier.quantite : 0;
+        {/* État de chargement internet */}
+        {chargement ? (
+          <div className="text-center py-20">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-amber-500 mx-auto mb-4"></div>
+            <p className="text-stone-400 text-sm font-medium tracking-wide">Ouverture de la carte...</p>
+          </div>
+        ) : plats.length === 0 ? (
+          <div className="text-center py-20 text-stone-500 text-sm">
+            Aucun plat n'est disponible sur la carte pour le moment.
+          </div>
+        ) : (
+          /* Grille des Plats */
+          <div className="grid md:grid-cols-2 gap-8 max-w-5xl mx-auto">
+            {platsFiltres.map((plat) => {
+              const itemDansPanier = panier.find(item => String(item.plat.id) === String(plat.id));
+              const quantite = itemDansPanier ? itemDansPanier.quantite : 0;
 
-            return (
-              <div 
-                key={plat.id} 
-                className="group bg-stone-900/30 hover:bg-stone-900/60 border border-white/[0.02] p-4 rounded-2xl shadow-xl flex flex-col justify-between transition-all duration-300 hover:-translate-y-1"
-              >
-                <div className="relative">
+              return (
+                <div 
+                  key={plat.id} 
+                  className="group bg-stone-900 border border-stone-800 hover:border-amber-500/40 p-5 rounded-2xl shadow-2xl flex flex-col justify-between transition-all duration-300 relative overflow-hidden"
+                >
                   {plat.tag && (
-                    <span className="absolute top-3 right-3 z-10 text-[9px] font-black uppercase tracking-widest bg-amber-500 text-stone-950 px-2.5 py-1 rounded-lg shadow-md">
+                    <span className="absolute top-4 right-4 z-10 text-[10px] font-bold uppercase tracking-wider bg-stone-950 text-amber-400 px-2.5 py-1 rounded-md border border-stone-800">
                       {plat.tag}
                     </span>
                   )}
-                  <div className="w-full h-48 rounded-xl overflow-hidden mb-4 border border-white/5 relative bg-stone-950 shadow-inner">
-                    <img src={plat.image} alt={plat.nom} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" />
-                  </div>
-                  <span className="text-[9px] font-black tracking-widest uppercase text-amber-500/80 block mb-1">{plat.categorie}</span>
-                  <h4 className="text-lg font-black text-white mb-1 tracking-tight">{plat.nom}</h4>
-                  <p className="text-stone-400 text-xs leading-relaxed mb-6 font-medium">{plat.description}</p>
-                </div>
 
-                <div className="flex items-center justify-between pt-4 border-t border-white/[0.03] mt-auto">
-                  <span className="font-black text-xl text-white tracking-tight">{Number(plat.prix).toLocaleString()} <span className="text-[10px] font-black text-amber-400 ml-0.5">FCFA</span></span>
-
-                  <div className="flex items-center justify-end">
-                    {quantite > 0 ? (
-                      <div className="flex items-center bg-stone-950 rounded-xl border border-white/5 p-1.5 shadow-xl w-32 justify-between">
-                        <button onClick={() => retirarDuPanier(plat.id)} className="w-8 h-8 rounded-lg bg-stone-900 text-white font-black flex items-center justify-center text-sm">−</button>
-                        <span className="font-black text-xs text-amber-400 tabular-nums">{quantite}</span>
-                        <button onClick={() => ajouterAuPanier(plat)} className="w-8 h-8 rounded-lg bg-amber-500 text-stone-950 font-black flex items-center justify-center text-sm">+</button>
-                      </div>
-                    ) : (
-                      <button 
-                        onClick={() => ajouterAuPanier(plat)}
-                        className="bg-stone-900 hover:bg-amber-500 text-stone-300 hover:text-stone-950 px-5 py-2.5 rounded-xl text-[11px] font-black uppercase tracking-wider transition-all border border-white/5"
-                      >
-                        Ajouter 🛒
-                      </button>
-                    )}
+                  <div>
+                    <div className="w-full h-44 rounded-xl overflow-hidden mb-4 border border-stone-800 relative">
+                      <img src={plat.image} alt={plat.nom} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                    </div>
+                    <span className="text-[10px] font-bold tracking-widest uppercase text-amber-500/80 block mb-1">{plat.categorie}</span>
+                    <h4 className="text-lg font-bold text-white mb-1 group-hover:text-amber-400 transition-colors">{plat.nom}</h4>
+                    <p className="text-stone-400 text-xs leading-relaxed mb-4">{plat.description}</p>
                   </div>
+
+                  {/* ZONE PRIX ET UTILITIES */}
+                  <div className="flex items-center justify-between pt-4 border-t border-stone-800/60 mt-auto">
+                    <div>
+                      <span className="font-black text-xl text-white">{Number(plat.prix).toLocaleString()} <span className="text-xs font-bold text-amber-500">FCFA</span></span>
+                    </div>
+
+                    <div className="flex items-center justify-end">
+                      {quantite > 0 ? (
+                        <div className="flex items-center bg-stone-800 rounded-xl border border-stone-700 p-1 shadow-md w-32 justify-between">
+                          <button 
+                            onClick={() => retirarDuPanier(plat.id)}
+                            className="w-8 h-8 rounded-lg bg-stone-700 hover:bg-stone-600 text-stone-200 font-bold flex items-center justify-center transition-all text-base"
+                          >
+                            −
+                          </button>
+                          <span className="font-bold text-sm text-amber-400 tabular-nums">
+                            {quantite}
+                          </span>
+                          <button 
+                            onClick={() => ajouterAuPanier(plat)}
+                            className="w-8 h-8 rounded-lg bg-amber-500 hover:bg-amber-400 text-stone-950 font-bold flex items-center justify-center transition-all text-base"
+                          >
+                            +
+                          </button>
+                        </div>
+                      ) : (
+                        <button 
+                          onClick={() => ajouterAuPanier(plat)}
+                          className="bg-stone-800 hover:bg-amber-500 text-stone-200 hover:text-stone-950 px-5 py-2.5 rounded-xl text-xs font-bold uppercase tracking-wider transition-all border border-stone-700/50 hover:border-amber-500 shadow-md"
+                        >
+                          Ajouter 🛒
+                        </button>
+                      )}
+                    </div>
+                  </div>
+
                 </div>
-              </div>
-            );
-          })}
-        </div>
+              );
+            })}
+          </div>
+        )}
       </section>
 
-      {/* FOOTER STICKY PANIER AVEC LIVRAISON INTEGREE */}
+      {/* FOOTER BAR STICKY (PANIER GLOBAL) */}
       {panier.length > 0 && (
-        <section id="panier-section" className="fixed bottom-4 left-4 right-4 z-50 bg-stone-950/90 backdrop-blur-xl border border-white/10 shadow-[0_20px_50px_rgba(0,0,0,0.6)] p-5 max-w-4xl mx-auto rounded-2xl transition-all">
-          <div className="flex flex-col md:flex-row justify-between items-stretch md:items-center gap-5">
-            <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 flex-1">
-              <div className="text-left">
-                <span className="text-[10px] uppercase font-black text-stone-400 tracking-widest block mb-0.5">Commande ({totalArticles} plats)</span>
-                <span className="font-black text-2xl text-white tracking-tight block">
-                  Total : <span className="text-amber-400 tabular-nums">{totalGeneral.toLocaleString()} F</span>
-                </span>
-                <span className="text-[10px] text-stone-500 block mt-0.5">Dont livraison : {fraisLivraison} F</span>
-              </div>
-              
-              {/* Sélecteur Cotonou discret et pro */}
-              <div className="w-full sm:w-auto bg-stone-900 border border-white/5 rounded-xl px-3 py-2 flex flex-col justify-center">
-                <label className="text-[9px] font-black uppercase text-amber-500 tracking-wider mb-0.5">Zone de livraison</label>
-                <select 
-                  value={zoneLivraison}
-                  onChange={(e) => setZoneLivraison(e.target.value)}
-                  className="bg-transparent text-xs font-bold text-white focus:outline-none cursor-pointer pr-4"
-                >
-                  {Object.keys(tarificationLivraison).map((zone) => (
-                    <option key={zone} value={zone} className="bg-stone-950 text-white">
-                      {zone} (+{tarificationLivraison[zone]} F)
-                    </option>
-                  ))}
-                </select>
-              </div>
+        <section id="panier-section" className="fixed bottom-0 left-0 right-0 z-50 bg-stone-950/95 backdrop-blur-md border-t-2 border-amber-500 shadow-2xl p-4 max-w-4xl mx-auto rounded-t-3xl">
+          <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
+            <div className="text-center sm:text-left">
+              <span className="text-xs text-stone-400 block font-semibold">Votre Sélection ({totalArticles} articles)</span>
+              <span className="font-black text-2xl text-white tracking-wide">
+                Total : <span className="text-amber-500 tabular-nums">{totalGeneral.toLocaleString()} FCFA</span>
+              </span>
             </div>
             
-            <div className="flex items-center space-x-4 justify-between md:justify-end">
-              <button onClick={() => setPanier([])} className="text-stone-400 hover:text-red-400 text-[11px] font-black uppercase tracking-wider px-3 py-2 transition-colors">Vider</button>
-              <button onClick={envoyerCommandeWhatsApp} className="flex-1 md:flex-none bg-emerald-600 hover:bg-emerald-500 text-white font-black text-[11px] uppercase tracking-widest px-8 py-4 rounded-xl transition-all">Commander 💬</button>
+            <div className="flex items-center space-x-3 w-full sm:w-auto">
+              <button 
+                onClick={viderPanier}
+                className="text-stone-400 hover:text-red-500 text-xs font-bold uppercase tracking-wider px-3 py-2 transition-colors"
+              >
+                Vider
+              </button>
+              <button 
+                onClick={envoyerCommandeWhatsApp}
+                className="w-full sm:w-auto flex-1 sm:flex-none bg-emerald-600 hover:bg-emerald-500 text-white font-black text-xs uppercase tracking-widest px-8 py-3.5 rounded-xl shadow-lg transition-all flex items-center justify-center space-x-2"
+              >
+                <span>Commander ({totalGeneral.toLocaleString()} F)</span>
+                <span className="text-sm">💬</span>
+              </button>
             </div>
           </div>
         </section>
       )}
 
-      {/* FOOTER BAS DE PAGE */}
-      <footer id="contact" className="bg-[#080706] border-t border-white/[0.02] mt-24 py-12 px-6 text-center text-stone-500 text-[11px] tracking-wide">
-        <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-8 text-stone-400 mb-8 border-b border-white/[0.02] pb-8">
+      {/* INFORMATIONS CONTACT */}
+      <footer id="contact" className="bg-stone-950 border-t border-stone-800 mt-16 py-10 px-6 text-center text-stone-500 text-xs">
+        <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-6 text-stone-400 mb-6">
           <div>
-            <h5 className="font-black uppercase tracking-widest text-amber-500 text-[10px] mb-1">📍 Cotonou</h5>
-            <p className="text-stone-400 text-xs font-medium">Avenue de la Marina, Fidjrossè</p>
+            <h5 className="font-bold text-white mb-0.5">📍 Localisation</h5>
+            <p className="text-stone-500 text-xs">Avenue de la Marina, Fidjrossè, Cotonou, Bénin</p>
           </div>
           <div>
-            <h5 className="font-black uppercase tracking-widest text-amber-500 text-[10px] mb-1">🕒 Service</h5>
-            <p className="text-stone-400 text-xs font-medium">Lun - Dim : 11h00 - 23h00</p>
+            <h5 className="font-bold text-white mb-0.5">🕒 Horaires</h5>
+            <p className="text-stone-500 text-xs">Lun - Dim : 11h00 - 23h00</p>
           </div>
         </div>
-        <p className="font-medium">© 2026 Kànòlí Resto. Expérience de commande fluide.</p>
+        <p>© 2026 Kànòlí Resto. Solution de commande WhatsApp connectée.</p>
       </footer>
 
     </main>

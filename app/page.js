@@ -23,7 +23,7 @@ export default function Home() {
   const [panier, setPanier] = useState([]); 
   const [zoneLivraison, setZoneLivraison] = useState("Fidjrossè");
   
-  // 📸 État pour gérer l'affichage de l'image en grand (Lightbox)
+  // 📸 État pour la Lightbox (zoom sur les plats de la carte)
   const [imageZoomee, setImageZoomee] = useState(null);
 
   useEffect(() => {
@@ -85,7 +85,7 @@ export default function Home() {
   return (
     <main className="min-h-screen bg-[#0c0a09] text-stone-200 font-sans pb-40 selection:bg-amber-500 selection:text-black">
       
-      {/* HEADER */}
+      {/* HEADER GLASS */}
       <header className="sticky top-0 z-50 backdrop-blur-xl bg-stone-950/80 border-b border-white/5 px-6 py-4 flex justify-between items-center max-w-7xl mx-auto rounded-b-3xl shadow-2xl">
         <div className="flex items-center space-x-2.5">
           <span className="text-2xl drop-shadow-[0_0_8px_rgba(245,158,11,0.5)] animate-pulse">🔥</span>
@@ -107,12 +107,12 @@ export default function Home() {
         </button>
       </header>
 
-      {/* HERO BANNER SOMBRE PREMIUM */}
+      {/* HERO BANNER : DESIGN CONSERVÉ À 100% AVEC TON IMAGE DE VIANDE SOMBRE */}
       <section 
         id="accueil" 
         className="relative py-28 md:py-40 px-6 max-w-7xl mx-auto text-center bg-cover bg-center bg-no-repeat rounded-3xl mt-4 overflow-hidden shadow-2xl"
         style={{ 
-          backgroundImage: "linear-gradient(to bottom, rgba(12, 10, 9, 0.70), rgba(12, 10, 9, 0.98)), url('https://kanoli-resto-depty-oj7wx9qmw-kamikaze-s-projects29.vercel.app/_next/image?url=%2F_next%2Fstatic%2Fmedia%2Fbg.bc64be73.png&w=1920&q=75')" 
+          backgroundImage: "linear-gradient(to bottom, rgba(12, 10, 9, 0.50), rgba(12, 10, 9, 0.85)), url('https://kanoli-resto-depty-jnwnuwbcz-kamikaze-s-projects29.vercel.app/_next/image?url=%2F_next%2Fstatic%2Fmedia%2Fbg.bc64be73.png&w=1920&q=75')" 
         }}
       >
         <div className="relative z-10 max-w-4xl mx-auto">
@@ -132,7 +132,7 @@ export default function Home() {
         </div>
       </section>
 
-      {/* LA CARTE */}
+      {/* LA CARTE AVEC LIGHTBOX SUR LES GRILLES */}
       <section id="menu" className="py-20 px-4 max-w-7xl mx-auto">
         <div className="text-center mb-10">
           <h3 className="text-[10px] font-black uppercase tracking-widest text-amber-500 mb-2">Menu du jour</h3>
@@ -175,7 +175,7 @@ export default function Home() {
                     </span>
                   )}
                   
-                  {/* Image cliquable avec icône zoom au survol */}
+                  {/* Image cliquable (PROPREMENT CONFIGURÉE) */}
                   <div 
                     onClick={() => setImageZoomee({ src: plat.image, alt: plat.nom })}
                     className="w-full h-48 rounded-xl overflow-hidden mb-4 border border-white/5 relative bg-stone-950 shadow-inner cursor-zoom-in group/img"
@@ -217,38 +217,33 @@ export default function Home() {
         </div>
       </section>
 
-      {/* 🖼️ MODALE LIGHTBOX (GALERIE D'IMAGES EN GRAND) */}
+      {/* 🖼️ BOÎTE MODALE LIGHTBOX */}
       {imageZoomee && (
         <div 
-          className="fixed inset-0 z-[100] bg-black/95 backdrop-blur-md flex flex-col items-center justify-center p-4 animate-fadeIn"
+          className="fixed inset-0 z-[100] bg-black/95 backdrop-blur-md flex flex-col items-center justify-center p-4"
           onClick={() => setImageZoomee(null)}
         >
-          {/* Bouton Fermer */}
           <button 
-            className="absolute top-6 right-6 text-white bg-white/10 hover:bg-white/20 w-10 h-10 rounded-full flex items-center justify-center text-xl font-bold transition-colors border border-white/10"
+            className="absolute top-6 right-6 text-white bg-white/10 hover:bg-white/20 w-10 h-10 rounded-full flex items-center justify-center text-xl font-bold border border-white/10"
             onClick={() => setImageZoomee(null)}
           >
             ✕
           </button>
-          
-          {/* Conteneur image */}
           <div className="max-w-4xl max-h-[75vh] rounded-2xl overflow-hidden border border-white/10 shadow-2xl relative">
             <img 
               src={imageZoomee.src} 
               alt={imageZoomee.alt} 
               className="w-full h-full object-contain max-h-[75vh]"
-              onClick={(e) => e.stopPropagation()} // Évite de fermer si on clique sur la photo elle-même
+              onClick={(e) => e.stopPropagation()} 
             />
           </div>
-
-          {/* Légende sous l'image */}
           <p className="text-white font-black tracking-wide text-center mt-4 text-base px-4 bg-stone-900/60 py-2 rounded-xl border border-white/5 backdrop-blur-sm">
             {imageZoomee.alt}
           </p>
         </div>
       )}
 
-      {/* PANIER FOOTER STICKY */}
+      {/* PANIER */}
       {panier.length > 0 && (
         <section id="panier-section" className="fixed bottom-4 left-4 right-4 z-50 bg-stone-950/90 backdrop-blur-xl border border-white/10 shadow-[0_20px_50px_rgba(0,0,0,0.6)] p-5 max-w-4xl mx-auto rounded-2xl">
           <div className="flex flex-col md:flex-row justify-between items-stretch md:items-center gap-5">
@@ -260,7 +255,6 @@ export default function Home() {
                 </span>
                 <span className="text-[10px] text-stone-500 block mt-0.5">Dont livraison : {fraisLivraison} F</span>
               </div>
-              
               <div className="w-full sm:w-auto bg-stone-900 border border-white/5 rounded-xl px-3 py-2 flex flex-col justify-center">
                 <label className="text-[9px] font-black uppercase text-amber-500 tracking-wider mb-0.5">Zone de livraison</label>
                 <select 
@@ -276,7 +270,6 @@ export default function Home() {
                 </select>
               </div>
             </div>
-            
             <div className="flex items-center space-x-4 justify-between md:justify-end">
               <button onClick={() => setPanier([])} className="text-stone-400 hover:text-red-400 text-[11px] font-black uppercase tracking-wider px-3 py-2">Vider</button>
               <button onClick={envoyerCommandeWhatsApp} className="flex-1 md:flex-none bg-emerald-600 hover:bg-emerald-500 text-white font-black text-[11px] uppercase tracking-widest px-8 py-4 rounded-xl">Commander 💬</button>
@@ -285,7 +278,7 @@ export default function Home() {
         </section>
       )}
 
-      {/* FOOTER BAS DE PAGE */}
+      {/* FOOTER */}
       <footer id="contact" className="bg-[#080706] border-t border-white/[0.02] mt-24 py-12 px-6 text-center text-stone-500 text-[11px] tracking-wide">
         <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-8 text-stone-400 mb-8 border-b border-white/[0.02] pb-8">
           <div>

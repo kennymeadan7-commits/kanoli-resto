@@ -74,14 +74,21 @@ export default function Home() {
     });
   };
 
-  const retirerDuPanier = (platId) => {
+  const retirarDuPanier = (platId) => {
     setPanier((prevPanier) => {
-      const item = prevPanier.find(item => item.plat.id === platId);
-      if (item?.quantite === 1) {
-        return prevPanier.filter(item => item.plat.id !== platId);
+      // On cherche l'article en comparant les ID (on force la conversion en String pour éviter les bugs de type)
+      const item = prevPanier.find(item => String(item.plat.id) === String(platId));
+      
+      if (!item) return prevPanier; // Si le plat n'est pas dans le panier, on ne fait rien
+
+      if (item.quantite === 1) {
+        // S'il n'y en a qu'un, on supprime carrément le plat du panier
+        return prevPanier.filter(item => String(item.plat.id) !== String(platId));
       }
+      
+      // Sinon, on diminue la quantité de 1
       return prevPanier.map(item => 
-        item.plat.id === platId ? { ...item, quantite: item.quantite - 1 } : item
+        String(item.plat.id) === String(platId) ? { ...item, quantite: item.quantite - 1 } : item
       );
     });
   };

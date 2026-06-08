@@ -28,15 +28,18 @@ export default function Home() {
   const [imageZoomee, setImageZoomee] = useState(null);
   const [clientInfo, setClientInfo] = useState({ nom: "", tel: "", adresse: "", paiement: "Espèces" });
 
+  // 1. Initialisation : Charger le panier
   useEffect(() => {
     const panierSauvegarde = localStorage.getItem("panier-kanoli");
     if (panierSauvegarde) setPanier(JSON.parse(panierSauvegarde));
   }, []);
 
+  // 2. Sauvegarde auto du panier
   useEffect(() => {
     localStorage.setItem("panier-kanoli", JSON.stringify(panier));
   }, [panier]);
 
+  // 3. Supabase : Fetch + Realtime
   useEffect(() => {
     async function recupererPlats() {
       const { data } = await supabase.from("plats").select("*").order("id", { ascending: true });
@@ -47,6 +50,7 @@ export default function Home() {
     return () => { supabase.removeChannel(canalRealtime); };
   }, []);
 
+  // Calculs
   const platsFiltres = plats.filter(p => {
     const matchCat = categorieActive === "Tous" || p.categorie === categorieActive;
     const matchSearch = p.nom.toLowerCase().includes(searchTerm.toLowerCase()) || 
@@ -60,6 +64,7 @@ export default function Home() {
   const totalArticles = panier.reduce((sum, i) => sum + i.quantite, 0);
   const numeroWhatsApp = "22961000000";
 
+  // Fonctions Panier
   const ajouterAuPanier = (plat) => {
     setPanier((prev) => {
       const ex = prev.find(i => String(i.plat.id) === String(plat.id));
@@ -85,7 +90,7 @@ export default function Home() {
   };
 
   return (
-    <main className="min-h-screen bg-[#0c0a09] text-stone-200 font-sans pb-40">
+    <main className="min-h-screen bg-[#0c0a09] text-stone-200 font-sans pb-40 selection:bg-amber-500 selection:text-black">
       
       {/* HEADER */}
       <header className="sticky top-0 z-50 backdrop-blur-xl bg-stone-950/80 border-b border-white/5 px-6 py-4 flex justify-between items-center max-w-7xl mx-auto rounded-b-3xl">
@@ -101,8 +106,12 @@ export default function Home() {
       </header>
 
       {/* HERO SECTION */}
-      <section id="accueil" className="py-20 text-center px-6">
-        <h2 className="text-4xl md:text-6xl font-black text-white mb-6">Le goût du terroir,<br/> réinventé avec <span className="text-amber-500">Élégance</span>.</h2>
+      <section id="accueil" className="relative py-32 text-center px-6 overflow-hidden rounded-b-3xl mb-12 shadow-2xl">
+        <img src="/hero-bg.jpg" alt="Fond restaurant" className="absolute inset-0 w-full h-full object-cover" />
+        <div className="absolute inset-0 bg-black/70"></div>
+        <div className="relative z-10">
+          <h2 className="text-4xl md:text-6xl font-black text-white mb-6">Le goût du terroir,<br/> réinventé avec <span className="text-amber-500">Élégance</span>.</h2>
+        </div>
       </section>
 
       {/* FILTRES & RECHERCHE */}
@@ -187,7 +196,7 @@ export default function Home() {
 
       {/* PANIER FOOTER */}
       {panier.length > 0 && (
-        <section id="panier-section" className="fixed bottom-4 left-4 right-4 z-50 bg-stone-950/90 backdrop-blur-xl border border-white/10 p-5 rounded-2xl flex justify-between items-center max-w-4xl mx-auto">
+        <section id="panier-section" className="fixed bottom-4 left-4 right-4 z-50 bg-stone-950/90 backdrop-blur-xl border border-white/10 p-5 rounded-2xl flex justify-between items-center max-w-4xl mx-auto shadow-2xl">
           <p className="text-white font-black">Total : {totalGeneral.toLocaleString()} F</p>
           <button onClick={() => setShowModal(true)} className="bg-emerald-600 text-white font-black px-8 py-3 rounded-xl">Commander 💬</button>
         </section>
@@ -210,7 +219,7 @@ export default function Home() {
           <div>
             <h4 className="font-black text-white mb-4 uppercase text-xs tracking-widest">Localisation</h4>
             <p className="text-stone-500 text-xs">Fidjrossè, Cotonou<br/>Bénin, Afrique de l'Ouest</p>
-            <a href="https://maps.google.com" className="text-amber-500 text-xs font-bold mt-2 block hover:underline">Voir sur Maps →</a>
+            <a href="#" className="text-amber-500 text-xs font-bold mt-2 block hover:underline">Voir sur Maps →</a>
           </div>
           <div>
             <h4 className="font-black text-white mb-4 uppercase text-xs tracking-widest">Contact</h4>

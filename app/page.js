@@ -23,8 +23,22 @@ export default function Home() {
   const [categorieActive, setCategorieActive] = useState("Tous");
   const [panier, setPanier] = useState([]); 
   const [zoneLivraison, setZoneLivraison] = useState("Fidjrossè");
-  const [imageZoomee, setImageZoomee] = useState(null);
+  
+  // États pour le formulaire
+  const [showModal, setShowModal] = useState(false);
+  const [clientInfo, setClientInfo] = useState({ nom: "", tel: "", adresse: "" });
 
+  useEffect(() => {
+    const panierSauvegarde = localStorage.getItem("panier-kanoli");
+    if (panierSauvegarde) {
+      setPanier(JSON.parse(panierSauvegarde));
+    }
+  }, []);
+
+  useEffect(() => {
+    localStorage.setItem("panier-kanoli", JSON.stringify(panier));
+  }, [panier]);
+  
   useEffect(() => {
     async function recupererPlats() {
       const { data } = await supabase
@@ -72,12 +86,15 @@ export default function Home() {
   const envoyerCommandeWhatsApp = () => {
     if (panier.length === 0) return;
     let msg = `*🇧🇯 NOUVELLE COMMANDE - KÀNÒLÍ RESTO*\n\n`;
+    msg += `👤 *Nom :* ${clientInfo.nom}\n`;
+    msg += `📞 *Tel :* ${clientInfo.tel}\n`;
+    msg += `📍 *Adresse :* ${clientInfo.adresse}\n\n`;
     panier.forEach(i => { msg += `▪️ *${i.quantite}x* ${i.plat.nom} (${(i.plat.prix * i.quantite).toLocaleString()} F)\n`; });
     msg += `\n-------------------------\n`;
     msg += `🍲 Plats : ${totalPlats.toLocaleString()} F\n`;
     msg += `🛵 Livraison (${zoneLivraison}) : ${fraisLivraison.toLocaleString()} F\n`;
     msg += `💰 *TOTAL : ${totalGeneral.toLocaleString()} FCFA*\n`;
-    msg += `-------------------------\n\nMerci de me confirmer la commande !`;
+    msg += `-------------------------\n\n`;
     window.open(`https://wa.me/${numeroWhatsApp}?text=${encodeURIComponent(msg)}`, '_blank');
   };
 
@@ -90,11 +107,6 @@ export default function Home() {
           <span className="text-2xl animate-pulse">🔥</span>
           <span className="text-xl font-black tracking-widest bg-gradient-to-r from-amber-400 via-orange-400 to-amber-500 bg-clip-text text-transparent">KÀNÒLÍ</span>
         </div>
-        <nav className="hidden md:flex space-x-8 text-xs font-bold uppercase tracking-widest text-stone-400">
-          <a href="#accueil" className="hover:text-amber-400 transition-colors">Accueil</a>
-          <a href="#menu" className="hover:text-amber-400 transition-colors">La Carte</a>
-          <a href="#contact" className="hover:text-amber-400 transition-colors">Horaires</a>
-        </nav>
         <button 
           onClick={() => { if(panier.length > 0) document.getElementById('panier-section')?.scrollIntoView({behavior: 'smooth'}) }}
           className="bg-amber-500 hover:bg-amber-400 text-stone-950 font-black text-[11px] uppercase tracking-wider px-5 py-2.5 rounded-xl flex items-center space-x-2"
@@ -104,99 +116,49 @@ export default function Home() {
         </button>
       </header>
 
-      {/* HERO BANNER CORRIGÉ */}
+      {/* HERO BANNER */}
       <section id="accueil" className="relative py-20 md:py-32 px-6 max-w-[95rem] mx-auto text-center mt-4 overflow-hidden shadow-2xl rounded-3xl">
-  
-  {/* Image de fond */}
-  <img 
-    src="/hero-bg.jpg" 
-    alt="Fond restaurant" 
-    className="absolute inset-0 w-full h-full object-contain object-center bg-black" 
-  />
-  
-  {/* Overlay */}
-  <div className="absolute inset-0 bg-black/70"></div>
-
-  {/* Contenu - Plus équilibré */}
-  <div className="relative z-10 max-w-3xl mx-auto">
-    <span className="inline-flex items-center gap-2 text-[10px] font-black uppercase tracking-widest bg-white/5 text-amber-400 border border-white/10 px-4 py-2 rounded-full mb-6 backdrop-blur-md">
-      <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-ping"></span>
-      Cuisine Connectée • Cotonou
-    </span>
-    
-    {/* Texte réduit et espacement contrôlé */}
-    <h2 className="text-4xl md:text-6xl font-black tracking-tighter mb-6 leading-[1.1] text-white">
-      Le goût du terroir,<br/>
-      réinventé avec <span className="bg-gradient-to-r from-amber-400 via-orange-500 to-amber-300 bg-clip-text text-transparent">Élégance</span>.
-    </h2>
-    
-    <p className="text-sm md:text-base text-stone-300 max-w-lg mx-auto mb-8 leading-relaxed font-medium">
-      Découvrez notre carte synchronisée en direct. Composez votre panier et commandez instantanément via WhatsApp.
-    </p>
-    
-    <a href="#menu" className="bg-gradient-to-r from-amber-500 to-orange-600 text-stone-950 px-8 py-4 rounded-xl font-black text-sm uppercase tracking-widest hover:scale-105 transition-transform inline-block shadow-lg">
-      Consulter la Carte
-    </a>
-  </div>
-</section>
+        <img src="/hero-bg.jpg" alt="Fond restaurant" className="absolute inset-0 w-full h-full object-contain object-center bg-black" />
+        <div className="absolute inset-0 bg-black/70"></div>
+        <div className="relative z-10 max-w-3xl mx-auto">
+          <span className="inline-flex items-center gap-2 text-[10px] font-black uppercase tracking-widest bg-white/5 text-amber-400 border border-white/10 px-4 py-2 rounded-full mb-6 backdrop-blur-md">
+            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-ping"></span>
+            Cuisine Connectée • Cotonou
+          </span>
+          <h2 className="text-4xl md:text-6xl font-black tracking-tighter mb-6 leading-[1.1] text-white">
+            Le goût du terroir,<br/>
+            réinventé avec <span className="bg-gradient-to-r from-amber-400 via-orange-500 to-amber-300 bg-clip-text text-transparent">Élégance</span>.
+          </h2>
+          <p className="text-sm md:text-base text-stone-300 max-w-lg mx-auto mb-8 leading-relaxed font-medium">
+            Découvrez notre carte synchronisée en direct. Composez votre panier et commandez instantanément via WhatsApp.
+          </p>
+          <a href="#menu" className="bg-gradient-to-r from-amber-500 to-orange-600 text-stone-950 px-8 py-4 rounded-xl font-black text-sm uppercase tracking-widest hover:scale-105 transition-transform inline-block shadow-lg">
+            Consulter la Carte
+          </a>
+        </div>
+      </section>
 
       {/* MENU */}
       <section id="menu" className="py-20 px-4 max-w-7xl mx-auto">
-        <div className="text-center mb-10">
-          <h3 className="text-[10px] font-black uppercase tracking-widest text-amber-500 mb-2">Menu du jour</h3>
-          <p className="text-2xl md:text-4xl font-black text-white tracking-tight">Les Incontournables Kànòlí</p>
-          <div className="w-12 h-1 bg-gradient-to-r from-amber-500 to-orange-500 mx-auto mt-4 rounded-full"></div>
-        </div>
-
-        <div className="flex overflow-x-auto justify-start md:justify-center gap-2.5 mb-14 pb-4 px-2 scrollbar-none snap-x">
-          {categories.map((cat) => (
-            <button
-              key={cat}
-              onClick={() => setCategorieActive(cat)}
-              className={`snap-center px-5 py-3 rounded-xl text-[11px] font-black uppercase tracking-wider transition-all shrink-0 border duration-300 ${
-                categorieActive === cat
-                  ? "bg-white text-black border-white shadow-xl scale-102"
-                  : "bg-stone-900/40 text-stone-400 hover:text-white border-white/5 hover:bg-stone-900"
-              }`}
-            >
-              {cat}
-            </button>
-          ))}
-        </div>
-
         <div className="grid md:grid-cols-2 gap-6 max-w-5xl mx-auto">
           {platsFiltres.map((plat) => {
             const itemDansPanier = panier.find(i => String(i.plat.id) === String(plat.id));
             const quantite = itemDansPanier ? itemDansPanier.quantite : 0;
             return (
-              <div key={plat.id} className="group bg-stone-900/30 hover:bg-stone-900/60 border border-white/[0.02] p-4 rounded-2xl shadow-xl flex flex-col justify-between transition-all duration-300 hover:-translate-y-1">
-                <div className="relative">
-                  {plat.tag && (<span className="absolute top-3 right-3 z-10 text-[9px] font-black uppercase tracking-widest bg-amber-500 text-stone-950 px-2.5 py-1 rounded-lg shadow-md">{plat.tag}</span>)}
-                  <div onClick={() => setImageZoomee({ src: plat.image, alt: plat.nom })} className="w-full h-48 rounded-xl overflow-hidden mb-4 border border-white/5 relative bg-stone-950 shadow-inner cursor-zoom-in group/img">
-                    <img src={plat.image} alt={plat.nom} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" />
-                    <div className="absolute inset-0 bg-black/40 opacity-0 group-hover/img:opacity-100 transition-opacity flex items-center justify-center text-white text-xs font-bold gap-1.5 backdrop-blur-[2px]">
-                      <span>🔍 Zoomer le plat</span>
-                    </div>
-                  </div>
-                  <span className="text-[9px] font-black tracking-widest uppercase text-amber-500/80 block mb-1">{plat.categorie}</span>
-                  <h4 className="text-lg font-black text-white mb-1 tracking-tight">{plat.nom}</h4>
-                  <p className="text-stone-400 text-xs leading-relaxed mb-6 font-medium">{plat.description}</p>
-                </div>
-                <div className="flex items-center justify-between pt-4 border-t border-white/[0.03] mt-auto">
-                  <span className="font-black text-xl text-white tracking-tight">{Number(plat.prix).toLocaleString()} <span className="text-[10px] font-black text-amber-400 ml-0.5">FCFA</span></span>
-                  <div className="flex items-center justify-end">
+              <div key={plat.id} className="group bg-stone-900/30 hover:bg-stone-900/60 border border-white/[0.02] p-4 rounded-2xl shadow-xl flex flex-col justify-between transition-all duration-300">
+                <h4 className="text-lg font-black text-white">{plat.nom}</h4>
+                <p className="text-stone-400 text-xs mb-4">{plat.description}</p>
+                <div className="flex justify-between items-center">
+                    <span className="font-bold text-amber-500">{Number(plat.prix).toLocaleString()} F</span>
                     {quantite > 0 ? (
-                      <div className="flex items-center bg-stone-950 rounded-xl border border-white/5 p-1.5 shadow-xl w-32 justify-between">
-                        <button onClick={() => retirarDuPanier(plat.id)} className="w-8 h-8 rounded-lg bg-stone-900 text-white font-black flex items-center justify-center text-sm">−</button>
-                        <span className="font-black text-xs text-amber-400 tabular-nums">{quantite}</span>
-                        <button onClick={() => ajouterAuPanier(plat)} className="w-8 h-8 rounded-lg bg-amber-500 text-stone-950 font-black flex items-center justify-center text-sm">+</button>
-                      </div>
+                        <div className="flex items-center gap-2">
+                            <button onClick={() => retirarDuPanier(plat.id)} className="bg-stone-800 px-3 py-1 rounded-lg">-</button>
+                            <span className="font-bold">{quantite}</span>
+                            <button onClick={() => ajouterAuPanier(plat)} className="bg-amber-600 px-3 py-1 rounded-lg">+</button>
+                        </div>
                     ) : (
-                      <button onClick={() => ajouterAuPanier(plat)} className="bg-stone-900 hover:bg-amber-500 text-stone-300 hover:text-stone-950 px-5 py-2.5 rounded-xl text-[11px] font-black uppercase tracking-wider transition-all border border-white/5">
-                        Ajouter 🛒
-                      </button>
+                        <button onClick={() => ajouterAuPanier(plat)} className="bg-stone-800 px-4 py-2 rounded-lg text-xs font-bold uppercase">Ajouter</button>
                     )}
-                  </div>
                 </div>
               </div>
             );
@@ -204,57 +166,39 @@ export default function Home() {
         </div>
       </section>
 
-      {/* LIGHTBOX */}
-      {imageZoomee && (
-        <div className="fixed inset-0 z-[100] bg-black/95 backdrop-blur-md flex flex-col items-center justify-center p-4" onClick={() => setImageZoomee(null)}>
-          <button className="absolute top-6 right-6 text-white bg-white/10 hover:bg-white/20 w-10 h-10 rounded-full flex items-center justify-center text-xl font-bold border border-white/10" onClick={() => setImageZoomee(null)}>✕</button>
-          <div className="max-w-4xl max-h-[75vh] rounded-2xl overflow-hidden border border-white/10 shadow-2xl relative">
-            <img src={imageZoomee.src} alt={imageZoomee.alt} className="w-full h-full object-contain max-h-[75vh]" onClick={(e) => e.stopPropagation()} />
+      {/* MODAL COMMANDE */}
+      {showModal && (
+        <div className="fixed inset-0 z-[100] bg-black/90 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-stone-900 p-6 rounded-2xl w-full max-w-md border border-white/10 shadow-2xl">
+            <h3 className="text-white font-black text-xl mb-4">Vos informations</h3>
+            <input type="text" placeholder="Votre nom" className="w-full bg-stone-950 border border-white/10 p-3 mb-3 rounded-xl text-white" onChange={(e) => setClientInfo({...clientInfo, nom: e.target.value})} />
+            <input type="tel" placeholder="Votre téléphone" className="w-full bg-stone-950 border border-white/10 p-3 mb-3 rounded-xl text-white" onChange={(e) => setClientInfo({...clientInfo, tel: e.target.value})} />
+            <input type="text" placeholder="Adresse de livraison" className="w-full bg-stone-950 border border-white/10 p-3 mb-6 rounded-xl text-white" onChange={(e) => setClientInfo({...clientInfo, adresse: e.target.value})} />
+            <div className="flex gap-3">
+              <button onClick={() => setShowModal(false)} className="flex-1 px-4 py-3 bg-stone-800 rounded-xl text-white font-bold">Annuler</button>
+              <button onClick={() => { envoyerCommandeWhatsApp(); setShowModal(false); }} className="flex-1 px-4 py-3 bg-emerald-600 rounded-xl text-white font-bold">Confirmer</button>
+            </div>
           </div>
-          <p className="text-white font-black tracking-wide text-center mt-4 text-base px-4 bg-stone-900/60 py-2 rounded-xl border border-white/5 backdrop-blur-sm">{imageZoomee.alt}</p>
         </div>
       )}
 
-      {/* PANIER */}
+      {/* PANIER (Footer flottant) */}
       {panier.length > 0 && (
         <section id="panier-section" className="fixed bottom-4 left-4 right-4 z-50 bg-stone-950/90 backdrop-blur-xl border border-white/10 shadow-[0_20px_50px_rgba(0,0,0,0.6)] p-5 max-w-4xl mx-auto rounded-2xl">
-          <div className="flex flex-col md:flex-row justify-between items-stretch md:items-center gap-5">
-            <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 flex-1">
-              <div className="text-left">
-                <span className="text-[10px] uppercase font-black text-stone-400 tracking-widest block mb-0.5">Commande ({totalArticles} plats)</span>
-                <span className="font-black text-2xl text-white tracking-tight block">Total : <span className="text-amber-400 tabular-nums">{totalGeneral.toLocaleString()} F</span></span>
-                <span className="text-[10px] text-stone-500 block mt-0.5">Dont livraison : {fraisLivraison} F</span>
-              </div>
-              <div className="w-full sm:w-auto bg-stone-900 border border-white/5 rounded-xl px-3 py-2 flex flex-col justify-center">
-                <label className="text-[9px] font-black uppercase text-amber-500 tracking-wider mb-0.5">Zone de livraison</label>
-                <select value={zoneLivraison} onChange={(e) => setZoneLivraison(e.target.value)} className="bg-transparent text-xs font-bold text-white focus:outline-none cursor-pointer pr-4">
-                  {Object.keys(tarificationLivraison).map((zone) => (
-                    <option key={zone} value={zone} className="bg-stone-950 text-white">{zone} (+{tarificationLivraison[zone]} F)</option>
-                  ))}
-                </select>
-              </div>
+          <div className="flex justify-between items-center">
+            <div>
+              <p className="text-white font-black">Total : {totalGeneral.toLocaleString()} F</p>
             </div>
-            <div className="flex items-center space-x-4 justify-between md:justify-end">
-              <button onClick={() => setPanier([])} className="text-stone-400 hover:text-red-400 text-[11px] font-black uppercase tracking-wider px-3 py-2">Vider</button>
-              <button onClick={envoyerCommandeWhatsApp} className="flex-1 md:flex-none bg-emerald-600 hover:bg-emerald-500 text-white font-black text-[11px] uppercase tracking-widest px-8 py-4 rounded-xl">Commander 💬</button>
-            </div>
+            <button onClick={() => setShowModal(true)} className="bg-emerald-600 hover:bg-emerald-500 text-white font-black text-[11px] uppercase tracking-widest px-8 py-4 rounded-xl">
+              Commander 💬
+            </button>
           </div>
         </section>
       )}
 
       {/* FOOTER */}
-      <footer id="contact" className="bg-[#080706] border-t border-white/[0.02] mt-24 py-12 px-6 text-center text-stone-500 text-[11px] tracking-wide">
-        <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-8 text-stone-400 mb-8 border-b border-white/[0.02] pb-8">
-          <div>
-            <h5 className="font-black uppercase tracking-widest text-amber-500 text-[10px] mb-1">📍 Cotonou</h5>
-            <p className="text-stone-400 text-xs font-medium">Avenue de la Marina, Fidjrossè</p>
-          </div>
-          <div>
-            <h5 className="font-black uppercase tracking-widest text-amber-500 text-[10px] mb-1">🕒 Service</h5>
-            <p className="text-stone-400 text-xs font-medium">Lun - Dim : 11h00 - 23h00</p>
-          </div>
-        </div>
-        <p className="font-medium">© 2026 Kànòlí Resto. Expérience de commande fluide.</p>
+      <footer id="contact" className="bg-[#080706] border-t border-white/[0.02] mt-24 py-12 px-6 text-center text-stone-500 text-[11px]">
+        <p>© 2026 Kànòlí Resto. Expérience de commande fluide.</p>
       </footer>
     </main>
   );

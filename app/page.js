@@ -2,6 +2,7 @@
 import { useState, useEffect } from "react";
 import { createClient } from "@supabase/supabase-js";
 
+// Configuration Supabase
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 const supabase = createClient(supabaseUrl, supabaseAnonKey);
@@ -18,14 +19,12 @@ const tarificationLivraison = {
 const categories = ["Tous", "Plat Traditionnel", "Spécialité", "Entrée / Snack"];
 
 export default function Home() {
-  const [plats, setPlats] = useState([]); 
+  const [plats, setPlats] = useState([]);
   const [categorieActive, setCategorieActive] = useState("Tous");
-  const [panier, setPanier] = useState([]); 
+  const [panier, setPanier] = useState([]);
   const [zoneLivraison, setZoneLivraison] = useState("Fidjrossè");
-  const [imageZoomee, setImageZoomee] = useState(null);
-  
-  // Correction ici : initialisation complète
   const [showModal, setShowModal] = useState(false);
+  const [imageZoomee, setImageZoomee] = useState(null);
   const [clientInfo, setClientInfo] = useState({ nom: "", tel: "", adresse: "", paiement: "Espèces" });
 
   useEffect(() => {
@@ -36,14 +35,14 @@ export default function Home() {
   useEffect(() => {
     localStorage.setItem("panier-kanoli", JSON.stringify(panier));
   }, [panier]);
-  
+
   useEffect(() => {
     async function recupererPlats() {
       const { data } = await supabase.from("plats").select("*").order("id", { ascending: true });
       if (data) setPlats(data);
     }
     recupererPlats();
-    const canalRealtime = supabase.channel("liaison-directe").on("postgres_changes", { event: "*", schema: "public", table: "plats" }, () => recupererPlats()).subscribe();
+    const canalRealtime = supabase.channel("realtime-plats").on("postgres_changes", { event: "*", schema: "public", table: "plats" }, () => recupererPlats()).subscribe();
     return () => { supabase.removeChannel(canalRealtime); };
   }, []);
 
@@ -52,18 +51,7 @@ export default function Home() {
   const fraisLivraison = panier.length > 0 ? tarificationLivraison[zoneLivraison] : 0;
   const totalGeneral = totalPlats + fraisLivraison;
   const totalArticles = panier.reduce((sum, i) => sum + i.quantite, 0);
-  const numeroWhatsApp = "22961000000"; 
-
-  // Fonction unique et corrigée
-  const envoyerCommandeWhatsApp = () => {
-    if (panier.length === 0) return;
-    const modePaiement = clientInfo.paiement || "Espèces";
-    let msg = `*🇧🇯 NOUVELLE COMMANDE - KÀNÒLÍ RESTO*\n\n`;
-    msg += `👤 *Client :* ${clientInfo.nom}\n📞 *Tel :* ${clientInfo.tel}\n📍 *Adresse :* ${clientInfo.adresse}\n💳 *Paiement :* ${modePaiement}\n\n`;
-    panier.forEach(i => { msg += `▪️ *${i.quantite}x* ${i.plat.nom} (${(i.plat.prix * i.quantite).toLocaleString()} F)\n`; });
-    msg += `\n💰 *TOTAL : ${totalGeneral.toLocaleString()} FCFA*`;
-    window.open(`https://wa.me/${numeroWhatsApp}?text=${encodeURIComponent(msg)}`, '_blank');
-  };
+  const numeroWhatsApp = "22961000000";
 
   const ajouterAuPanier = (plat) => {
     setPanier((prev) => {
@@ -80,28 +68,73 @@ export default function Home() {
     });
   };
 
+  const envoyerCommandeWhatsApp = () => {
+    if (panier.length === 0) return;
+    const modePaiement = clientInfo.paiement || "Espèces";
+    let msg = `*🇧🇯 NOUVELLE COMMANDE - KÀNÒLÍ RESTO*\n\n`;
+    msg += `👤 *Client :* ${clientInfo.nom}\n📞 *Tel :* ${clientInfo.tel}\n📍 *Adresse :* ${clientInfo.adresse}\n💳 *Paiement :* ${modePaiement}\n\n`;
+    panier.forEach(i => { msg += `▪️ *${i.quantite}x* ${i.plat.nom} (${(i.plat.prix * i.quantite).toLocaleString()} F)\n`; });
+    msg += `\n💰 *TOTAL : ${totalGeneral.toLocaleString()} FCFA*`;
+    window.open(`https://wa.me/${numeroWhatsApp}?text=${encodeURIComponent(msg)}`, '_blank');
+  };
+
   return (
-    <main className="min-h-screen bg-[#0c0a09] text-stone-200 font-sans pb-40">
-      {/* ... [Garde ton header et ton hero ici, je les ai omis pour la brièveté du message] ... */}
+    <main className="min-h-screen bg-[#0c0a09] text-stone-200 font-sans pb-40 selection:bg-amber-500 selection:text-black">
       
-      {/* MENU */}
+      {/* HEADER */}
+      <header className="sticky top-0 z-50 backdrop-blur-xl bg-stone-950/80 border-b border-white/5 px-6 py-4 flex justify-between items-center max-w-7xl mx-auto rounded-b-3xl shadow-2xl">
+        <div className="flex items-center space-x-2.5">
+          <span className="text-2xl animate-pulse">🔥</span>
+          <span className="text-xl font-black tracking-widest bg-gradient-to-r from-amber-400 via-orange-400 to-amber-500 bg-clip-text text-transparent">KÀNÒLÍ</span>
+        </div>
+        <button onClick={() => document.getElementById('panier-section')?.scrollIntoView({ behavior: 'smooth' })} className="bg-amber-500 hover:bg-amber-400 text-stone-950 font-black text-[11px] uppercase tracking-wider px-5 py-2.5 rounded-xl flex items-center space-x-2">
+          <span>🛒 Panier</span>
+          <span className="bg-stone-950 text-amber-400 px-2 py-0.5 rounded-lg text-[10px] font-black tabular-nums shadow-inner">{totalArticles}</span>
+        </button>
+      </header>
+
+      {/* HERO BANNER */}
+      <section className="relative py-20 md:py-32 px-6 max-w-[95rem] mx-auto text-center mt-4 overflow-hidden shadow-2xl rounded-3xl">
+        <img src="/hero-bg.jpg" alt="Fond restaurant" className="absolute inset-0 w-full h-full object-cover object-center bg-black" />
+        <div className="absolute inset-0 bg-black/70"></div>
+        <div className="relative z-10 max-w-3xl mx-auto">
+          <span className="inline-flex items-center gap-2 text-[10px] font-black uppercase tracking-widest bg-white/5 text-amber-400 border border-white/10 px-4 py-2 rounded-full mb-6 backdrop-blur-md">
+            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-ping"></span>
+            Cuisine Connectée • Cotonou
+          </span>
+          <h2 className="text-4xl md:text-6xl font-black tracking-tighter mb-6 leading-[1.1] text-white">
+            Le goût du terroir,<br/> réinventé avec <span className="bg-gradient-to-r from-amber-400 via-orange-500 to-amber-300 bg-clip-text text-transparent">Élégance</span>.
+          </h2>
+        </div>
+      </section>
+
+      {/* FILTRES */}
+      <div className="flex gap-2 justify-center py-8 overflow-x-auto px-4">
+        {categories.map((cat) => (
+          <button key={cat} onClick={() => setCategorieActive(cat)} className={`px-4 py-2 rounded-full text-xs font-bold transition-all ${categorieActive === cat ? "bg-amber-500 text-stone-950" : "bg-stone-900 text-stone-400 hover:bg-stone-800"}`}>
+            {cat}
+          </button>
+        ))}
+      </div>
+
+      {/* MENU GRID */}
       <div className="grid md:grid-cols-2 gap-6 max-w-5xl mx-auto px-4">
         {platsFiltres.map((plat) => {
           const itemDansPanier = panier.find(i => String(i.plat.id) === String(plat.id));
           const quantite = itemDansPanier ? itemDansPanier.quantite : 0;
           return (
-            <div key={plat.id} className="group bg-stone-900/30 p-4 rounded-2xl border border-white/5">
-              <div onClick={() => setImageZoomee({ src: plat.image, alt: plat.nom })} className="w-full h-48 rounded-xl overflow-hidden mb-4 cursor-zoom-in">
-                <img src={plat.image} alt={plat.nom} className="w-full h-full object-cover" />
+            <div key={plat.id} className="group bg-stone-900/30 hover:bg-stone-900/60 border border-white/[0.02] p-4 rounded-2xl shadow-xl flex flex-col justify-between transition-all duration-300">
+              <div onClick={() => setImageZoomee({ src: plat.image || "https://images.unsplash.com/photo-1546069901-ba9599a7e63c", alt: plat.nom })} className="w-full h-48 rounded-xl overflow-hidden mb-4 border border-white/5 relative bg-stone-950 cursor-zoom-in">
+                <img src={plat.image || "https://images.unsplash.com/photo-1546069901-ba9599a7e63c"} alt={plat.nom} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" />
               </div>
               <h4 className="text-lg font-black text-white">{plat.nom}</h4>
               <p className="text-stone-400 text-xs mb-4">{plat.description}</p>
-              <div className="flex justify-between items-center">
+              <div className="flex justify-between items-center mt-auto">
                 <span className="font-bold text-amber-500">{Number(plat.prix).toLocaleString()} F</span>
-                <div className="flex items-center gap-2">
-                   {quantite > 0 && <button onClick={() => retirarDuPanier(plat.id)} className="bg-stone-800 px-3 py-1 rounded-lg">-</button>}
-                   {quantite > 0 && <span className="font-bold">{quantite}</span>}
-                   <button onClick={() => ajouterAuPanier(plat)} className="bg-amber-600 px-3 py-1 rounded-lg">+</button>
+                <div className="flex items-center gap-3">
+                  {quantite > 0 && <button onClick={() => retirarDuPanier(plat.id)} className="bg-stone-800 px-3 py-1 rounded-lg">-</button>}
+                  {quantite > 0 && <span className="font-bold text-amber-400">{quantite}</span>}
+                  <button onClick={() => ajouterAuPanier(plat)} className="bg-amber-600 px-3 py-1 rounded-lg text-stone-950 font-bold">+</button>
                 </div>
               </div>
             </div>
@@ -109,24 +142,22 @@ export default function Home() {
         })}
       </div>
 
-      {/* LIGHTBOX */}
-      {imageZoomee && (
-        <div className="fixed inset-0 z-[100] bg-black/95 flex items-center justify-center p-4" onClick={() => setImageZoomee(null)}>
-          <img src={imageZoomee.src} className="max-h-[80vh] rounded-xl" />
-        </div>
-      )}
-
       {/* MODAL COMMANDE */}
       {showModal && (
         <div className="fixed inset-0 z-[100] bg-black/90 backdrop-blur-sm flex items-center justify-center p-4">
           <div className="bg-stone-900 p-6 rounded-2xl w-full max-w-md border border-white/10 shadow-2xl">
             <h3 className="text-white font-black text-xl mb-4">Finaliser la commande</h3>
-            <input type="text" placeholder="Nom" className="w-full bg-stone-950 p-3 mb-3 rounded-xl text-white" onChange={(e) => setClientInfo({...clientInfo, nom: e.target.value})} />
-            <input type="tel" placeholder="Téléphone" className="w-full bg-stone-950 p-3 mb-3 rounded-xl text-white" onChange={(e) => setClientInfo({...clientInfo, tel: e.target.value})} />
-            <input type="text" placeholder="Adresse" className="w-full bg-stone-950 p-3 mb-3 rounded-xl text-white" onChange={(e) => setClientInfo({...clientInfo, adresse: e.target.value})} />
+            <input type="text" placeholder="Nom" className="w-full bg-stone-950 border border-white/10 p-3 mb-3 rounded-xl text-white" onChange={(e) => setClientInfo({...clientInfo, nom: e.target.value})} />
+            <input type="tel" placeholder="Téléphone" className="w-full bg-stone-950 border border-white/10 p-3 mb-3 rounded-xl text-white" onChange={(e) => setClientInfo({...clientInfo, tel: e.target.value})} />
+            <input type="text" placeholder="Adresse" className="w-full bg-stone-950 border border-white/10 p-3 mb-3 rounded-xl text-white" onChange={(e) => setClientInfo({...clientInfo, adresse: e.target.value})} />
             
+            <label className="text-stone-400 text-xs font-bold uppercase block mb-2">Zone :</label>
+            <select className="w-full bg-stone-950 border border-white/10 p-3 mb-3 rounded-xl text-white" onChange={(e) => setZoneLivraison(e.target.value)}>
+              {Object.keys(tarificationLivraison).map(zone => <option key={zone} value={zone}>{zone}</option>)}
+            </select>
+
             <label className="text-stone-400 text-xs font-bold uppercase block mb-2">Paiement :</label>
-            <select className="w-full bg-stone-950 p-3 mb-6 rounded-xl text-white" onChange={(e) => setClientInfo({...clientInfo, paiement: e.target.value})}>
+            <select className="w-full bg-stone-950 border border-white/10 p-3 mb-6 rounded-xl text-white" onChange={(e) => setClientInfo({...clientInfo, paiement: e.target.value})}>
               <option value="Espèces">Espèces (à la livraison)</option>
               <option value="Mobile Money">Mobile Money (MTN / Moov)</option>
             </select>
@@ -138,6 +169,25 @@ export default function Home() {
           </div>
         </div>
       )}
+
+      {/* PANIER FOOTER */}
+      {panier.length > 0 && (
+        <section id="panier-section" className="fixed bottom-4 left-4 right-4 z-50 bg-stone-950/90 backdrop-blur-xl border border-white/10 p-5 rounded-2xl flex justify-between items-center max-w-4xl mx-auto shadow-2xl">
+          <p className="text-white font-black">Total : {totalGeneral.toLocaleString()} F</p>
+          <button onClick={() => setShowModal(true)} className="bg-emerald-600 hover:bg-emerald-500 text-white font-black px-8 py-3 rounded-xl">Commander 💬</button>
+        </section>
+      )}
+
+      {/* LIGHTBOX */}
+      {imageZoomee && (
+        <div className="fixed inset-0 z-[100] bg-black/95 flex items-center justify-center p-4" onClick={() => setImageZoomee(null)}>
+          <img src={imageZoomee.src} className="max-h-[80vh] rounded-xl" />
+        </div>
+      )}
+
+      <footer className="bg-[#080706] border-t border-white/[0.02] mt-24 py-12 px-6 text-center text-stone-500 text-[11px]">
+        <p>© 2026 Kànòlí Resto. Expérience de commande fluide.</p>
+      </footer>
     </main>
   );
 }

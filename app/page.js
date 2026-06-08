@@ -105,32 +105,40 @@ export default function Home() {
       </header>
 
       {/* HERO BANNER CORRIGÉ */}
-      <section id="accueil" className="relative py-28 md:py-48 px-6 max-w-[95rem] mx-auto text-center mt-4 overflow-hidden shadow-2xl rounded-3xl">
-        {/* Image de fond fixe */}
-        <img 
-          src="/hero-bg.jpg" 
-          alt="Fond restaurant" 
-          className="absolute inset-0 w-full h-full object-cover object-center" 
-        />
-        {/* Overlay sombre */}
-        <div className="absolute inset-0 bg-black/70"></div>
+      <section id="accueil" className="relative py-20 md:py-32 px-6 max-w-[95rem] mx-auto text-center mt-4 overflow-hidden shadow-2xl rounded-3xl">
+  
+  {/* Image de fond */}
+  <img 
+    src="/hero-bg.jpg" 
+    alt="Fond restaurant" 
+    className="absolute inset-0 w-full h-full object-cover object-center" 
+  />
+  
+  {/* Overlay */}
+  <div className="absolute inset-0 bg-black/70"></div>
 
-        <div className="relative z-10 max-w-4xl mx-auto">
-          <span className="inline-flex items-center gap-2 text-[10px] font-black uppercase tracking-widest bg-white/5 text-amber-400 border border-white/10 px-4 py-2 rounded-full mb-8 backdrop-blur-md">
-            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-ping"></span>
-            Cuisine Connectée • Cotonou
-          </span>
-          <h2 className="text-5xl md:text-8xl font-black tracking-tighter mb-6 leading-[0.9] text-white">
-            Le goût du terroir,<br/>réinventé avec <span className="bg-gradient-to-r from-amber-400 via-orange-500 to-amber-300 bg-clip-text text-transparent drop-shadow-sm">Élégance</span>.
-          </h2>
-          <p className="text-sm md:text-base text-stone-300 max-w-lg mx-auto mb-10 leading-relaxed font-medium">
-            Découvrez notre carte synchronisée en direct. Composez votre panier et commandez instantanément via WhatsApp.
-          </p>
-          <a href="#menu" className="bg-gradient-to-r from-amber-500 to-orange-600 text-stone-950 px-10 py-5 rounded-2xl font-black text-sm uppercase tracking-widest shadow-[0_4px_30px_rgba(245,158,11,0.3)] hover:scale-105 transition-transform inline-block">
-            Consulter la Carte
-          </a>
-        </div>
-      </section>
+  {/* Contenu - Plus équilibré */}
+  <div className="relative z-10 max-w-3xl mx-auto">
+    <span className="inline-flex items-center gap-2 text-[10px] font-black uppercase tracking-widest bg-white/5 text-amber-400 border border-white/10 px-4 py-2 rounded-full mb-6 backdrop-blur-md">
+      <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-ping"></span>
+      Cuisine Connectée • Cotonou
+    </span>
+    
+    {/* Texte réduit et espacement contrôlé */}
+    <h2 className="text-4xl md:text-6xl font-black tracking-tighter mb-6 leading-[1.1] text-white">
+      Le goût du terroir,<br/>
+      réinventé avec <span className="bg-gradient-to-r from-amber-400 via-orange-500 to-amber-300 bg-clip-text text-transparent">Élégance</span>.
+    </h2>
+    
+    <p className="text-sm md:text-base text-stone-300 max-w-lg mx-auto mb-8 leading-relaxed font-medium">
+      Découvrez notre carte synchronisée en direct. Composez votre panier et commandez instantanément via WhatsApp.
+    </p>
+    
+    <a href="#menu" className="bg-gradient-to-r from-amber-500 to-orange-600 text-stone-950 px-8 py-4 rounded-xl font-black text-sm uppercase tracking-widest hover:scale-105 transition-transform inline-block shadow-lg">
+      Consulter la Carte
+    </a>
+  </div>
+</section>
 
       {/* MENU */}
       <section id="menu" className="py-20 px-4 max-w-7xl mx-auto">

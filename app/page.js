@@ -139,32 +139,37 @@ export default function Home() {
       </section>
 
       {/* MENU */}
-      <section id="menu" className="py-20 px-4 max-w-7xl mx-auto">
-        <div className="grid md:grid-cols-2 gap-6 max-w-5xl mx-auto">
-          {platsFiltres.map((plat) => {
-            const itemDansPanier = panier.find(i => String(i.plat.id) === String(plat.id));
-            const quantite = itemDansPanier ? itemDansPanier.quantite : 0;
-            return (
-              <div key={plat.id} className="group bg-stone-900/30 hover:bg-stone-900/60 border border-white/[0.02] p-4 rounded-2xl shadow-xl flex flex-col justify-between transition-all duration-300">
-                <h4 className="text-lg font-black text-white">{plat.nom}</h4>
-                <p className="text-stone-400 text-xs mb-4">{plat.description}</p>
-                <div className="flex justify-between items-center">
-                    <span className="font-bold text-amber-500">{Number(plat.prix).toLocaleString()} F</span>
-                    {quantite > 0 ? (
-                        <div className="flex items-center gap-2">
-                            <button onClick={() => retirarDuPanier(plat.id)} className="bg-stone-800 px-3 py-1 rounded-lg">-</button>
-                            <span className="font-bold">{quantite}</span>
-                            <button onClick={() => ajouterAuPanier(plat)} className="bg-amber-600 px-3 py-1 rounded-lg">+</button>
-                        </div>
-                    ) : (
-                        <button onClick={() => ajouterAuPanier(plat)} className="bg-stone-800 px-4 py-2 rounded-lg text-xs font-bold uppercase">Ajouter</button>
-                    )}
-                </div>
-              </div>
-            );
-          })}
+      <div className="grid md:grid-cols-2 gap-6 max-w-5xl mx-auto">
+  {platsFiltres.map((plat) => {
+    const itemDansPanier = panier.find(i => String(i.plat.id) === String(plat.id));
+    const quantite = itemDansPanier ? itemDansPanier.quantite : 0;
+    return (
+      <div key={plat.id} className="group bg-stone-900/30 hover:bg-stone-900/60 border border-white/[0.02] p-4 rounded-2xl shadow-xl flex flex-col justify-between transition-all duration-300">
+        
+        {/* IMAGE DU PLAT */}
+        <div onClick={() => setImageZoomee({ src: plat.image, alt: plat.nom })} className="w-full h-48 rounded-xl overflow-hidden mb-4 border border-white/5 relative bg-stone-950 cursor-zoom-in">
+          <img src={plat.image} alt={plat.nom} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" />
         </div>
-      </section>
+
+        <h4 className="text-lg font-black text-white">{plat.nom}</h4>
+        <p className="text-stone-400 text-xs mb-4">{plat.description}</p>
+        
+        <div className="flex justify-between items-center mt-auto">
+          <span className="font-bold text-amber-500">{Number(plat.prix).toLocaleString()} F</span>
+          {quantite > 0 ? (
+            <div className="flex items-center gap-2">
+              <button onClick={() => retirarDuPanier(plat.id)} className="bg-stone-800 px-3 py-1 rounded-lg text-white font-bold">-</button>
+              <span className="font-bold text-amber-400">{quantite}</span>
+              <button onClick={() => ajouterAuPanier(plat)} className="bg-amber-600 px-3 py-1 rounded-lg text-stone-950 font-bold">+</button>
+            </div>
+          ) : (
+            <button onClick={() => ajouterAuPanier(plat)} className="bg-stone-800 hover:bg-amber-500 hover:text-stone-950 transition-colors px-4 py-2 rounded-lg text-xs font-bold uppercase text-white">Ajouter</button>
+          )}
+        </div>
+      </div>
+    );
+  })}
+</div>
 
       {/* MODAL COMMANDE */}
       {showModal && (

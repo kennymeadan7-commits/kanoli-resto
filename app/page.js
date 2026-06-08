@@ -92,18 +92,44 @@ export default function Home() {
 
   // Logique de confirmation
   const handleConfirmer = () => {
+    // Vérification de la sécurité du paiement
     if (clientInfo.paiement === "Mobile Money") {
-      const handler = window.FedaPay.init({
-        public_key: FEDAPAY_PUBLIC_KEY,
-        transaction: { amount: totalGeneral, description: "Commande Kànòlí Resto" },
-        customer: { email: "client@kanoli.bj", firstname: clientInfo.nom, phone_number: clientInfo.tel }
-      });
-      handler.open();
+        
+        // VÉRIFICATION : Est-ce que FedaPay est chargé ?
+        if (typeof window.FedaPay === "undefined") {
+            alert("Le système de paiement est en cours de chargement... Attends 2 secondes et réessaie.");
+            console.error("FedaPay n'est pas encore défini dans window.");
+            return;
+        }
+
+        console.log("Initialisation du paiement FedaPay...");
+        
+        const handler = window.FedaPay.init({
+            public_key: FEDAPAY_PUBLIC_KEY,
+            transaction: { 
+                amount: totalGeneral, 
+                description: "Commande Kànòlí Resto" 
+            },
+            customer: { 
+                email: "client@kanoli.bj", 
+                firstname: clientInfo.nom, 
+                phone_number: clientInfo.tel 
+            }
+        });
+
+        // Gestionnaire d'ouverture (pour voir si ça plante ici)
+        try {
+            handler.open();
+        } catch (e) {
+            console.error("Erreur lors de l'ouverture du modal FedaPay :", e);
+            alert("Une erreur est survenue lors de l'ouverture du paiement. Vérifie ta console (F12).");
+        }
+
     } else {
-      envoyerCommandeWhatsApp();
+        envoyerCommandeWhatsApp();
+        setShowModal(false);
     }
-    setShowModal(false);
-  };
+};
 
   const envoyerCommandeWhatsApp = () => {
     if (panier.length === 0) return;

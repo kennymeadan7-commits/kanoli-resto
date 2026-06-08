@@ -104,14 +104,17 @@ export default function Home() {
         </button>
       </header>
 
-      {/* HERO BANNER */}
-      <section 
-        id="accueil" 
-        className="relative py-28 md:py-48 px-6 max-w-[95rem] mx-auto text-center bg-cover bg-center bg-no-repeat mt-4 overflow-hidden shadow-2xl rounded-3xl"
-        style={{ 
-          backgroundImage: "linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.85)), url('/hero-bg.jpg')" 
-        }}
-      >
+      {/* HERO BANNER CORRIGÉ */}
+      <section id="accueil" className="relative py-28 md:py-48 px-6 max-w-[95rem] mx-auto text-center mt-4 overflow-hidden shadow-2xl rounded-3xl">
+        {/* Image de fond fixe */}
+        <img 
+          src="/hero-bg.jpg" 
+          alt="Fond restaurant" 
+          className="absolute inset-0 w-full h-full object-cover object-center" 
+        />
+        {/* Overlay sombre */}
+        <div className="absolute inset-0 bg-black/70"></div>
+
         <div className="relative z-10 max-w-4xl mx-auto">
           <span className="inline-flex items-center gap-2 text-[10px] font-black uppercase tracking-widest bg-white/5 text-amber-400 border border-white/10 px-4 py-2 rounded-full mb-8 backdrop-blur-md">
             <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-ping"></span>

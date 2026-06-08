@@ -2,6 +2,7 @@
 import { useState, useEffect } from "react";
 import { createClient } from "@supabase/supabase-js";
 
+// Configuration Supabase
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 const supabase = createClient(supabaseUrl, supabaseAnonKey);
@@ -22,8 +23,6 @@ export default function Home() {
   const [categorieActive, setCategorieActive] = useState("Tous");
   const [panier, setPanier] = useState([]); 
   const [zoneLivraison, setZoneLivraison] = useState("Fidjrossè");
-  
-  // 📸 État pour la Lightbox (zoom sur les plats de la carte)
   const [imageZoomee, setImageZoomee] = useState(null);
 
   useEffect(() => {
@@ -85,13 +84,11 @@ export default function Home() {
   return (
     <main className="min-h-screen bg-[#0c0a09] text-stone-200 font-sans pb-40 selection:bg-amber-500 selection:text-black">
       
-      {/* HEADER GLASS */}
+      {/* HEADER */}
       <header className="sticky top-0 z-50 backdrop-blur-xl bg-stone-950/80 border-b border-white/5 px-6 py-4 flex justify-between items-center max-w-7xl mx-auto rounded-b-3xl shadow-2xl">
         <div className="flex items-center space-x-2.5">
-          <span className="text-2xl drop-shadow-[0_0_8px_rgba(245,158,11,0.5)] animate-pulse">🔥</span>
-          <span className="text-xl font-black tracking-widest bg-gradient-to-r from-amber-400 via-orange-400 to-amber-500 bg-clip-text text-transparent">
-            KÀNÒLÍ
-          </span>
+          <span className="text-2xl animate-pulse">🔥</span>
+          <span className="text-xl font-black tracking-widest bg-gradient-to-r from-amber-400 via-orange-400 to-amber-500 bg-clip-text text-transparent">KÀNÒLÍ</span>
         </div>
         <nav className="hidden md:flex space-x-8 text-xs font-bold uppercase tracking-widest text-stone-400">
           <a href="#accueil" className="hover:text-amber-400 transition-colors">Accueil</a>
@@ -107,12 +104,12 @@ export default function Home() {
         </button>
       </header>
 
-      {/* HERO BANNER : DESIGN CONSERVÉ À 100% AVEC TON IMAGE DE VIANDE SOMBRE */}
+      {/* HERO BANNER */}
       <section 
         id="accueil" 
-        className="relative py-28 md:py-40 px-6 max-w-7xl mx-auto text-center bg-cover bg-center bg-no-repeat rounded-3xl mt-4 overflow-hidden shadow-2xl"
+        className="relative py-28 md:py-48 px-6 max-w-[95rem] mx-auto text-center bg-cover bg-center bg-no-repeat mt-4 overflow-hidden shadow-2xl rounded-3xl"
         style={{ 
-          backgroundImage: "linear-gradient(to bottom, rgba(12, 10, 9, 0.50), rgba(12, 10, 9, 0.85)), url('https://kanoli-resto-depty-jnwnuwbcz-kamikaze-s-projects29.vercel.app/_next/image?url=%2F_next%2Fstatic%2Fmedia%2Fbg.bc64be73.png&w=1920&q=75')" 
+          backgroundImage: "linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.85)), url('/hero-bg.jpg')" 
         }}
       >
         <div className="relative z-10 max-w-4xl mx-auto">
@@ -120,19 +117,19 @@ export default function Home() {
             <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-ping"></span>
             Cuisine Connectée • Cotonou
           </span>
-          <h2 className="text-4xl md:text-7xl font-black tracking-tight mb-6 leading-[1.15] text-white">
+          <h2 className="text-5xl md:text-8xl font-black tracking-tighter mb-6 leading-[0.9] text-white">
             Le goût du terroir,<br/>réinventé avec <span className="bg-gradient-to-r from-amber-400 via-orange-500 to-amber-300 bg-clip-text text-transparent drop-shadow-sm">Élégance</span>.
           </h2>
-          <p className="text-xs md:text-sm text-stone-400 max-w-lg mx-auto mb-10 leading-relaxed font-medium">
+          <p className="text-sm md:text-base text-stone-300 max-w-lg mx-auto mb-10 leading-relaxed font-medium">
             Découvrez notre carte synchronisée en direct. Composez votre panier et commandez instantanément via WhatsApp.
           </p>
-          <a href="#menu" className="bg-gradient-to-r from-amber-500 to-orange-600 text-stone-950 px-8 py-4 rounded-xl font-black text-xs uppercase tracking-widest shadow-[0_4px_30px_rgba(245,158,11,0.2)] inline-block">
+          <a href="#menu" className="bg-gradient-to-r from-amber-500 to-orange-600 text-stone-950 px-10 py-5 rounded-2xl font-black text-sm uppercase tracking-widest shadow-[0_4px_30px_rgba(245,158,11,0.3)] hover:scale-105 transition-transform inline-block">
             Consulter la Carte
           </a>
         </div>
       </section>
 
-      {/* LA CARTE AVEC LIGHTBOX SUR LES GRILLES */}
+      {/* MENU */}
       <section id="menu" className="py-20 px-4 max-w-7xl mx-auto">
         <div className="text-center mb-10">
           <h3 className="text-[10px] font-black uppercase tracking-widest text-amber-500 mb-2">Menu du jour</h3>
@@ -140,7 +137,6 @@ export default function Home() {
           <div className="w-12 h-1 bg-gradient-to-r from-amber-500 to-orange-500 mx-auto mt-4 rounded-full"></div>
         </div>
 
-        {/* CATÉGORIES */}
         <div className="flex overflow-x-auto justify-start md:justify-center gap-2.5 mb-14 pb-4 px-2 scrollbar-none snap-x">
           {categories.map((cat) => (
             <button
@@ -157,43 +153,26 @@ export default function Home() {
           ))}
         </div>
 
-        {/* GRILLE DES PLATS */}
         <div className="grid md:grid-cols-2 gap-6 max-w-5xl mx-auto">
           {platsFiltres.map((plat) => {
             const itemDansPanier = panier.find(i => String(i.plat.id) === String(plat.id));
             const quantite = itemDansPanier ? itemDansPanier.quantite : 0;
-
             return (
-              <div 
-                key={plat.id} 
-                className="group bg-stone-900/30 hover:bg-stone-900/60 border border-white/[0.02] p-4 rounded-2xl shadow-xl flex flex-col justify-between transition-all duration-300 hover:-translate-y-1"
-              >
+              <div key={plat.id} className="group bg-stone-900/30 hover:bg-stone-900/60 border border-white/[0.02] p-4 rounded-2xl shadow-xl flex flex-col justify-between transition-all duration-300 hover:-translate-y-1">
                 <div className="relative">
-                  {plat.tag && (
-                    <span className="absolute top-3 right-3 z-10 text-[9px] font-black uppercase tracking-widest bg-amber-500 text-stone-950 px-2.5 py-1 rounded-lg shadow-md">
-                      {plat.tag}
-                    </span>
-                  )}
-                  
-                  {/* Image cliquable (PROPREMENT CONFIGURÉE) */}
-                  <div 
-                    onClick={() => setImageZoomee({ src: plat.image, alt: plat.nom })}
-                    className="w-full h-48 rounded-xl overflow-hidden mb-4 border border-white/5 relative bg-stone-950 shadow-inner cursor-zoom-in group/img"
-                  >
+                  {plat.tag && (<span className="absolute top-3 right-3 z-10 text-[9px] font-black uppercase tracking-widest bg-amber-500 text-stone-950 px-2.5 py-1 rounded-lg shadow-md">{plat.tag}</span>)}
+                  <div onClick={() => setImageZoomee({ src: plat.image, alt: plat.nom })} className="w-full h-48 rounded-xl overflow-hidden mb-4 border border-white/5 relative bg-stone-950 shadow-inner cursor-zoom-in group/img">
                     <img src={plat.image} alt={plat.nom} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" />
                     <div className="absolute inset-0 bg-black/40 opacity-0 group-hover/img:opacity-100 transition-opacity flex items-center justify-center text-white text-xs font-bold gap-1.5 backdrop-blur-[2px]">
                       <span>🔍 Zoomer le plat</span>
                     </div>
                   </div>
-
                   <span className="text-[9px] font-black tracking-widest uppercase text-amber-500/80 block mb-1">{plat.categorie}</span>
                   <h4 className="text-lg font-black text-white mb-1 tracking-tight">{plat.nom}</h4>
                   <p className="text-stone-400 text-xs leading-relaxed mb-6 font-medium">{plat.description}</p>
                 </div>
-
                 <div className="flex items-center justify-between pt-4 border-t border-white/[0.03] mt-auto">
                   <span className="font-black text-xl text-white tracking-tight">{Number(plat.prix).toLocaleString()} <span className="text-[10px] font-black text-amber-400 ml-0.5">FCFA</span></span>
-
                   <div className="flex items-center justify-end">
                     {quantite > 0 ? (
                       <div className="flex items-center bg-stone-950 rounded-xl border border-white/5 p-1.5 shadow-xl w-32 justify-between">
@@ -202,10 +181,7 @@ export default function Home() {
                         <button onClick={() => ajouterAuPanier(plat)} className="w-8 h-8 rounded-lg bg-amber-500 text-stone-950 font-black flex items-center justify-center text-sm">+</button>
                       </div>
                     ) : (
-                      <button 
-                        onClick={() => ajouterAuPanier(plat)}
-                        className="bg-stone-900 hover:bg-amber-500 text-stone-300 hover:text-stone-950 px-5 py-2.5 rounded-xl text-[11px] font-black uppercase tracking-wider transition-all border border-white/5"
-                      >
+                      <button onClick={() => ajouterAuPanier(plat)} className="bg-stone-900 hover:bg-amber-500 text-stone-300 hover:text-stone-950 px-5 py-2.5 rounded-xl text-[11px] font-black uppercase tracking-wider transition-all border border-white/5">
                         Ajouter 🛒
                       </button>
                     )}
@@ -217,29 +193,14 @@ export default function Home() {
         </div>
       </section>
 
-      {/* 🖼️ BOÎTE MODALE LIGHTBOX */}
+      {/* LIGHTBOX */}
       {imageZoomee && (
-        <div 
-          className="fixed inset-0 z-[100] bg-black/95 backdrop-blur-md flex flex-col items-center justify-center p-4"
-          onClick={() => setImageZoomee(null)}
-        >
-          <button 
-            className="absolute top-6 right-6 text-white bg-white/10 hover:bg-white/20 w-10 h-10 rounded-full flex items-center justify-center text-xl font-bold border border-white/10"
-            onClick={() => setImageZoomee(null)}
-          >
-            ✕
-          </button>
+        <div className="fixed inset-0 z-[100] bg-black/95 backdrop-blur-md flex flex-col items-center justify-center p-4" onClick={() => setImageZoomee(null)}>
+          <button className="absolute top-6 right-6 text-white bg-white/10 hover:bg-white/20 w-10 h-10 rounded-full flex items-center justify-center text-xl font-bold border border-white/10" onClick={() => setImageZoomee(null)}>✕</button>
           <div className="max-w-4xl max-h-[75vh] rounded-2xl overflow-hidden border border-white/10 shadow-2xl relative">
-            <img 
-              src={imageZoomee.src} 
-              alt={imageZoomee.alt} 
-              className="w-full h-full object-contain max-h-[75vh]"
-              onClick={(e) => e.stopPropagation()} 
-            />
+            <img src={imageZoomee.src} alt={imageZoomee.alt} className="w-full h-full object-contain max-h-[75vh]" onClick={(e) => e.stopPropagation()} />
           </div>
-          <p className="text-white font-black tracking-wide text-center mt-4 text-base px-4 bg-stone-900/60 py-2 rounded-xl border border-white/5 backdrop-blur-sm">
-            {imageZoomee.alt}
-          </p>
+          <p className="text-white font-black tracking-wide text-center mt-4 text-base px-4 bg-stone-900/60 py-2 rounded-xl border border-white/5 backdrop-blur-sm">{imageZoomee.alt}</p>
         </div>
       )}
 
@@ -250,22 +211,14 @@ export default function Home() {
             <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 flex-1">
               <div className="text-left">
                 <span className="text-[10px] uppercase font-black text-stone-400 tracking-widest block mb-0.5">Commande ({totalArticles} plats)</span>
-                <span className="font-black text-2xl text-white tracking-tight block">
-                  Total : <span className="text-amber-400 tabular-nums">{totalGeneral.toLocaleString()} F</span>
-                </span>
+                <span className="font-black text-2xl text-white tracking-tight block">Total : <span className="text-amber-400 tabular-nums">{totalGeneral.toLocaleString()} F</span></span>
                 <span className="text-[10px] text-stone-500 block mt-0.5">Dont livraison : {fraisLivraison} F</span>
               </div>
               <div className="w-full sm:w-auto bg-stone-900 border border-white/5 rounded-xl px-3 py-2 flex flex-col justify-center">
                 <label className="text-[9px] font-black uppercase text-amber-500 tracking-wider mb-0.5">Zone de livraison</label>
-                <select 
-                  value={zoneLivraison}
-                  onChange={(e) => setZoneLivraison(e.target.value)}
-                  className="bg-transparent text-xs font-bold text-white focus:outline-none cursor-pointer pr-4"
-                >
+                <select value={zoneLivraison} onChange={(e) => setZoneLivraison(e.target.value)} className="bg-transparent text-xs font-bold text-white focus:outline-none cursor-pointer pr-4">
                   {Object.keys(tarificationLivraison).map((zone) => (
-                    <option key={zone} value={zone} className="bg-stone-950 text-white">
-                      {zone} (+{tarificationLivraison[zone]} F)
-                    </option>
+                    <option key={zone} value={zone} className="bg-stone-950 text-white">{zone} (+{tarificationLivraison[zone]} F)</option>
                   ))}
                 </select>
               </div>
@@ -292,7 +245,6 @@ export default function Home() {
         </div>
         <p className="font-medium">© 2026 Kànòlí Resto. Expérience de commande fluide.</p>
       </footer>
-
     </main>
   );
 }

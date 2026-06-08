@@ -1,6 +1,7 @@
 "use client";
 import { useState, useEffect } from "react";
 import { createClient } from "@supabase/supabase-js";
+console.log("TEST CLÉ FEDAPAY :", process.env.NEXT_PUBLIC_FEDAPAY_PUBLIC_KEY);
 
 // Configuration
 const FEDAPAY_PUBLIC_KEY = process.env.NEXT_PUBLIC_FEDAPAY_PUBLIC_KEY;

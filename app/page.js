@@ -107,7 +107,7 @@ export default function Home() {
 
       {/* HERO SECTION */}
       <section id="accueil" className="relative py-32 text-center px-6 overflow-hidden rounded-b-3xl mb-12 shadow-2xl">
-        <img src="/hero-bg.jpg" alt="Fond restaurant" className="absolute inset-0 w-full h-full object-cover" />
+        <img src="/hero-bg.jpg" alt="Fond restaurant" className="absolute inset-0 w-full h-full object-contain" />
         <div className="absolute inset-0 bg-black/70"></div>
         <div className="relative z-10">
           <h2 className="text-4xl md:text-6xl font-black text-white mb-6">Le goût du terroir,<br/> réinventé avec <span className="text-amber-500">Élégance</span>.</h2>

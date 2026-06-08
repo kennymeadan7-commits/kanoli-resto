@@ -2,7 +2,8 @@
 import { useState, useEffect } from "react";
 import { createClient } from "@supabase/supabase-js";
 
-// Configuration Supabase
+// Configuration
+const FEDAPAY_PUBLIC_KEY = process.env.NEXT_PUBLIC_FEDAPAY_PUBLIC_KEY;
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 const supabase = createClient(supabaseUrl, supabaseAnonKey);
@@ -27,6 +28,15 @@ export default function Home() {
   const [showModal, setShowModal] = useState(false);
   const [imageZoomee, setImageZoomee] = useState(null);
   const [clientInfo, setClientInfo] = useState({ nom: "", tel: "", adresse: "", paiement: "Espèces" });
+
+  // Chargement script FedaPay
+  useEffect(() => {
+    const script = document.createElement("script");
+    script.src = "https://cdn.fedapay.com/checkout.js?v=1.1.7";
+    script.async = true;
+    document.body.appendChild(script);
+    return () => { document.body.removeChild(script); };
+  }, []);
 
   // 1. Initialisation : Charger le panier
   useEffect(() => {
@@ -78,6 +88,21 @@ export default function Home() {
       if (!item) return prev;
       return item.quantite === 1 ? prev.filter(i => String(i.plat.id) !== String(platId)) : prev.map(i => String(i.plat.id) === String(platId) ? { ...i, quantite: i.quantite - 1 } : i);
     });
+  };
+
+  // Logique de confirmation
+  const handleConfirmer = () => {
+    if (clientInfo.paiement === "Mobile Money") {
+      const handler = window.FedaPay.init({
+        public_key: FEDAPAY_PUBLIC_KEY,
+        transaction: { amount: totalGeneral, description: "Commande Kànòlí Resto" },
+        customer: { email: "client@kanoli.bj", firstname: clientInfo.nom, phone_number: clientInfo.tel }
+      });
+      handler.open();
+    } else {
+      envoyerCommandeWhatsApp();
+    }
+    setShowModal(false);
   };
 
   const envoyerCommandeWhatsApp = () => {
@@ -188,7 +213,7 @@ export default function Home() {
 
             <div className="flex gap-3">
               <button onClick={() => setShowModal(false)} className="flex-1 bg-stone-800 p-3 rounded-xl text-white">Annuler</button>
-              <button onClick={() => { envoyerCommandeWhatsApp(); setShowModal(false); }} className="flex-1 bg-emerald-600 p-3 rounded-xl text-white font-bold">Confirmer</button>
+              <button onClick={handleConfirmer} className="flex-1 bg-emerald-600 p-3 rounded-xl text-white font-bold">Confirmer</button>
             </div>
           </div>
         </div>

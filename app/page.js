@@ -95,7 +95,7 @@ export default function Home() {
 
       {/* HERO BANNER */}
       <section className="relative py-20 md:py-32 px-6 max-w-[95rem] mx-auto text-center mt-4 overflow-hidden shadow-2xl rounded-3xl">
-        <img src="/hero-bg.jpg" alt="Fond restaurant" className="absolute inset-0 w-full h-full object-cover object-center bg-black" />
+        <img src="/hero-bg.jpg" alt="Fond restaurant" className="absolute inset-0 w-full h-full object-contain object-center bg-black" />
         <div className="absolute inset-0 bg-black/70"></div>
         <div className="relative z-10 max-w-3xl mx-auto">
           <span className="inline-flex items-center gap-2 text-[10px] font-black uppercase tracking-widest bg-white/5 text-amber-400 border border-white/10 px-4 py-2 rounded-full mb-6 backdrop-blur-md">
